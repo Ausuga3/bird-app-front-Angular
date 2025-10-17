@@ -1,0 +1,48 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit(); $event.preventDefault()" novalidate>
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Nombre</label>
+        <input formControlName="name" type="text" class="form-control" id="name" aria-describedby="nameHelp">
+        @if(form.get('name')?.invalid && form.get('name')?.touched) {
+          <div class="text-danger">El nombre es obligatorio.</div>
+        }
+    </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input formControlName="email" type="email" class="form-control" id="email" aria-describedby="emailHelp">
+    @if(form.get('email')?.invalid && form.get('email')?.touched) {
+      <div class="text-danger">El email no es válido.</div>
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label">Contraseña</label>
+    <input type="password" class="form-control" id="password" formControlName="password">
+  </div>
+
+
+  <div class="mb-3">
+    <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+    <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword">
+  </div>
+  
+
+  <div class="mb-3 form-check">
+   <input type="checkbox" class="form-check-input" id="terms" formControlName="terms">
+    <label class="form-check-label" for="terms">Términos y condiciones</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Registrarse</button>
+
+  @if(errorMessage) {
+    <div class="alert alert-danger mt-3" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
+  @if(successMessage) {
+    <div class="alert alert-success mt-3" role="alert">
+      {{ successMessage }}
+    </div>
+  }
+</form>

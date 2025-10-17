@@ -1,0 +1,30 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit(); $event.preventDefault()" novalidate>
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input formControlName="email" type="email" class="form-control" id="email" aria-describedby="emailHelp">
+    @if(form.get('email')?.invalid && form.get('email')?.touched) {
+      <div class="text-danger">El email no es válido.</div>
+    }
+  </div>
+
+
+  <div class="mb-3">
+    <label for="loginPassword" class="form-label">Contraseña</label>
+    <input formControlName="password" type="password" class="form-control" id="loginPassword">
+    @if(form.get('password')?.invalid && form.get('password')?.touched) {
+      <div class="text-danger">La contraseña es obligatoria.</div>
+    }
+  </div>
+
+  <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
+  @if(errorMessage) {
+    <div class="alert alert-danger mt-3" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
+  @if(successMessage) {
+    <div class="alert alert-success mt-3" role="alert">
+      {{ successMessage }}
+    </div>
+  }
+</form>
