@@ -1,0 +1,61 @@
+<div class="table-container">
+    <div class="table-header">
+        <h2>Listado de Aves</h2>
+        <button class="btn-add" (click)="goToAddBird()">+ Agregar Ave</button>
+    </div>
+
+    @if (error()) {
+        <div class="alert alert-danger">
+            {{ error() }}
+            <button class="btn-retry" (click)="loadBirds()">Reintentar</button>
+        </div>
+    }
+
+    @if (isLoading()) {
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Cargando aves...</p>
+        </div>
+    } @else if (birds().length === 0) {
+        <div class="empty-state">
+            <p>No hay aves registradas todavía.</p>
+            <button class="btn-primary" (click)="goToAddBird()">Agregar la primera ave</button>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre Común</th>
+                        <th>Nombre Científico</th>
+                        <th>Familia</th>
+                        <th>Estado de Conservación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (bird of birds(); track bird.id) {
+                        <tr>
+                            <td>{{ bird.commonName }}</td>
+                            <td><em>{{ bird.scientificName }}</em></td>
+                            <td>{{ bird.family }}</td>
+                            <td>
+                                <span class="conservation-badge" [ngClass]="'status-' + bird.conservationStatus">
+                                    {{ bird.conservationStatus }}
+                                </span>
+                            </td>
+                            <td class="actions-column">
+                                <button class="btn-edit" (click)="editBird(bird.id)">
+                                    <span class="icon">✏️</span> Editar
+                                </button>
+                                <button class="btn-delete" (click)="deleteBird(bird.id)">
+                                    <span class="icon">🗑️</span> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

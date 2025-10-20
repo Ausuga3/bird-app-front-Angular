@@ -18,6 +18,21 @@ export const routes: Routes = [
       import('./core/features/user/presentation/pages/login-page/login-page.component')
     },
     {
+      path: 'birds/add',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/components/forms/form-bird/form-bird.component').then(m => m.FormBirdComponent)
+    },
+    {
+      path: 'birds/edit/:id',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/components/forms/form-bird/form-bird.component').then(m => m.FormBirdComponent)
+    },
+    {
+      path: 'birds',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/pages/list-bird-page/list-bird-page.component').then(m => m.ListBirdPageComponent)
+    },
+    {
       path:'**',
       redirectTo:''
     }
