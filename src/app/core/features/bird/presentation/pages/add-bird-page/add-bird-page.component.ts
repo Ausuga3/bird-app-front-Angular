@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBirdComponent } from "../../components/form-bird/form-bird.component";
+import { FormBirdComponent } from "../../components/forms/form-bird/form-bird.component";
 
 @Component({
   selector: 'app-add-bird-page',

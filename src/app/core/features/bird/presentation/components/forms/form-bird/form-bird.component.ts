@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { BirdRepository } from '../../../domain/repositories/bird.repository';
-import { AddBirdUseCase } from '../../../aplication/use-cases/add-bird.use-case';
-import { Bird, BirdFamily, ConservationStatusEnum } from '../../../domain/entities/bird.interface';
-import { BirdLocalRepository } from '../../../infrastructure/repositories/bird-local.repository';
+import { BirdRepository } from '../../../../domain/repositories/bird.repository';
+import { AddBirdUseCase } from '../../../../aplication/use-cases/add-bird.use-case';
+import { Bird, BirdFamily, ConservationStatusEnum } from '../../../../domain/entities/bird.interface';
+import { BirdLocalRepository } from '../../../../infrastructure/repositories/bird-local.repository';
 
 @Component({
   selector: 'app-form-bird',

@@ -20,12 +20,17 @@ export const routes: Routes = [
     {
       path: 'birds/add',
       loadComponent: () =>
-         import('./core/features/bird/presentation/components/form-bird/form-bird.component').then(m => m.FormBirdComponent)
+         import('./core/features/bird/presentation/components/forms/form-bird/form-bird.component').then(m => m.FormBirdComponent)
     },
     {
       path: 'birds/edit/:id',
       loadComponent: () =>
-         import('./core/features/bird/presentation/components/form-bird/form-bird.component').then(m => m.FormBirdComponent)
+         import('./core/features/bird/presentation/components/forms/form-bird/form-bird.component').then(m => m.FormBirdComponent)
+    },
+    {
+      path: 'birds',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/pages/list-bird-page/list-bird-page.component').then(m => m.ListBirdPageComponent)
     },
     {
       path:'**',
