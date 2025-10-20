@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {  FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginUserUseCase } from '../../../aplication/use-cases/login.usecase';
-import { Router } from '@angular/router'; // <-- agregado
+import { Router } from '@angular/router'; 
+import { AuthStateService } from '../../../../../shared/services/auth-state.service';
+import { SESSION_REPOSITORY } from '../../../domain/repositories/token-sesion';
+import { SessionRepository } from '../../../domain/repositories/sesion.repository';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +16,9 @@ import { Router } from '@angular/router'; // <-- agregado
 export class LoginComponent { 
   private fb = inject(FormBuilder);
   private loginUser = inject(LoginUserUseCase);
-  private router = inject(Router); // <-- agregado
+  private router = inject(Router); 
+  private authState = inject(AuthStateService);
+  private sessionRepository = inject(SESSION_REPOSITORY) as SessionRepository;
 
   form:FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -29,6 +34,22 @@ export class LoginComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
+    // Verificación adicional leyendo directamente la fuente de sesión (storage)
+    try {
+      const active = await this.sessionRepository.getActive();
+      if (active) {
+        this.errorMessage = 'Ya existe una sesión activa. Cierre sesión antes de iniciar una nueva.';
+        return;
+      }
+    } catch (err) {
+      // Si hay error al leer storage, seguir con la validación por signals
+      if (this.authState.isAuthenticated()) {
+        this.errorMessage = 'Ya existe una sesión activa. Cierre sesión antes de iniciar una nueva.';
+        return;
+      }
+    }
+
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.errorMessage = 'Por favor, complete el formulario correctamente.';
@@ -40,9 +61,13 @@ export class LoginComponent {
       const user = await this.loginUser.execute({ email, password });
       if (user) {
         this.successMessage = 'Inicio de sesión exitoso';
-        await this.router.navigate(['/'], { replaceUrl: true }); // <-- navegación al dashboard
+  // Actualizar el estado de autenticación para que el navbar reaccione
+  this.authState.setAuthenticated(user);
+  try { console.log('[LoginComponent] authState setAuthenticated ->', this.authState.isAuthenticated()); } catch {}
+        await this.router.navigate(['/'], { replaceUrl: true });
       }else{
-        this.errorMessage = 'Credenciales inválidas.';
+        // Puede deberse a credenciales inválidas o a que ya existe una sesión activa
+        this.errorMessage = 'Credenciales inválidas o ya existe una sesión activa.';
       }
     }catch (error) {
       console.error('❌ Error al iniciar sesión:', error);

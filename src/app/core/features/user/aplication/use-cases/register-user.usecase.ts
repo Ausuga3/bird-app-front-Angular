@@ -4,6 +4,7 @@ import { UserRepository } from "../../domain/repositories/user.repository";
 import { User } from "../../domain/entities/user.interface";
 import { RegisterUserDto } from "../dto/user.dto";
 import { UserDomainService } from "../../domain/services/user.domain-service";
+import { Rol, RolEnum } from "../../domain/entities/rol.interface";
 
 
 @Injectable({  providedIn: 'root'})
@@ -12,6 +13,12 @@ export class RegisterUserUseCase {
 
  async execute(dto: RegisterUserDto): Promise<User>{
   const hashedPassword = UserDomainService.hashPassword(dto.password);
+  const roleName = dto.rolName ?? RolEnum.USER;
+  const role: Rol = {
+    id: crypto.randomUUID(),
+    name: roleName,
+    description: roleName === RolEnum.EXPERT ? 'Usuario por defecto' : ''
+  };
 
   const newUser:User = {
     id: crypto.randomUUID(),
@@ -19,7 +26,8 @@ export class RegisterUserUseCase {
     email: dto.email,
     hashedPassword,
     isActive: false,
-    date: new Date()
+    date: new Date(),
+    rol: role
   };
 
   const createdUser = await this.userRepository.register(newUser);

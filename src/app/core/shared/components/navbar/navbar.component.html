@@ -3,10 +3,22 @@
     <div class="d-flex">
       <a class="navbar-brand" routerLink="/">Aves</a>
       <a class="navbar-brand">Avistamientos</a>
+      <!-- @if( isExpert() ) { -->
+        <a routerLink="birds/add" class="navbar-brand">Registrar Ave</a>
+      <!-- } -->
     </div>
-    <div class="d-flex gap-2" >
-      <button routerLink="login" class="btn btn-outline-success" type="submit">Login</button>
-      <button routerLink="register" class="btn btn-outline-primary" type="submit">Registrarse</button>
-    </div>
+
+
+    @if (isAuthenticated()) {
+      <div class="d-flex gap-2">
+        <button routerLink="/perfil" class="btn btn-outline-primary" type="button">Mi perfil</button>
+        <button (click)="onLogout()" class="btn btn-outline-danger" type="button">Cerrar sesión</button>
+      </div>
+    } @else {
+      <div class="d-flex gap-2">
+        <button routerLink="login" class="btn btn-outline-success" type="button">Login</button>
+        <button routerLink="register" class="btn btn-outline-primary" type="button">Registrarse</button>
+      </div>
+    }
   </div>
 </nav>

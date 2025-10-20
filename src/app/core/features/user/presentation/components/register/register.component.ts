@@ -44,7 +44,7 @@ export class RegisterComponent {
     }
 
     try{
-      const user = await this.registerUser.execute({ name, email, password })
+      const user = await this.registerUser.execute({ name, email, password });
         this.successMessage = 'Registro exitoso';
       console.log('🧩 Usuario registrado:', user);
       this.form.reset();

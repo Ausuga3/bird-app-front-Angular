@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from "./core/shared/components/navbar/navbar.component";
 import { USER_REPOSITORY } from './core/features/user/domain/repositories/token';
 import { UserRepositoryMock } from './core/features/user/infrastructure/repositories/user.repository.mock';
+import { birdProviders } from './core/features/bird/infrastructure/providers/bird.providers';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,8 @@ import { UserRepositoryMock } from './core/features/user/infrastructure/reposito
   providers:[
    { provide: USER_REPOSITORY,
     useClass: UserRepositoryMock
-  }
+  },
+  ...birdProviders
   ]
 })
 export class App {
