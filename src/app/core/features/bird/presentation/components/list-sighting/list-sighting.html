@@ -1,0 +1,93 @@
+
+<div class="list-container">
+  <h2>Listado de Avistamientos</h2>
+  
+  <!-- Barra de filtros -->
+  <div class="filters-container">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [formControl]="searchControl"
+        placeholder="Buscar por ave o país..." 
+        class="search-input"
+      />
+      <i class="material-icons search-icon">search</i>
+    </div>
+    
+    <a routerLink="/birds/sightings/add" class="add-button">
+      <i class="material-icons">add</i>
+      Nuevo Avistamiento
+    </a>
+  </div>
+  
+  <!-- Mensaje de carga -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando avistamientos...</p>
+    </div>
+  }
+  
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="error-message">
+      <i class="material-icons">error</i>
+      <p>{{ error() }}</p>
+    </div>
+  }
+  
+  <!-- Tabla de avistamientos -->
+  @if (!loading() && !error() && filteredSightings().length > 0) {
+    <div class="table-container">
+      <table class="sightings-table">
+        <thead>
+          <tr>
+            <th>Ave</th>
+            <th>Fecha</th>
+            <th>País</th>
+            <th>Coordenadas</th>
+            <th>Notas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sighting of filteredSightings(); track sighting.id) {
+            <tr>
+              <td>{{ sighting.birdName }}</td>
+              <td>{{ formatDate(sighting.created_at) }}</td>
+              <td>{{ sighting.country }}</td>
+              <td>
+                {{ sighting.coordinates ? (sighting.coordinates.latitude.toFixed(4) + ', ' + sighting.coordinates.longitude.toFixed(4)) : 'N/A' }}
+              </td>
+              <td>{{ sighting.notes || '-' }}</td>
+              <td class="actions">
+                <button 
+                  class="action-button delete" 
+                  (click)="deleteSighting(sighting.id || '')"
+                  title="Eliminar"
+                >
+                  <span class="material-icons">delete</span>
+                </button>
+                <!-- Si quieres añadir más acciones como editar -->
+                <!-- <button class="action-button edit" title="Editar">
+                  <i class="material-icons">edit</i>
+                </button> -->
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  
+  <!-- Mensaje de no resultados -->
+  @if (!loading() && !error() && filteredSightings().length === 0) {
+    <div class="empty-state">
+      <i class="material-icons">search_off</i>
+      <p>No se encontraron avistamientos</p>
+      <a routerLink="/birds/sightings/add" class="add-button">
+        Registrar un avistamiento
+      </a>
+    </div>
+  }
+</div>

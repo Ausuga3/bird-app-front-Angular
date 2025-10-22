@@ -1,0 +1,79 @@
+<div class="form-container">
+  <!-- Alertas fuera de condicionales para debug -->
+  <div class="alert alert-success" role="alert" *ngIf="successMessage">
+    {{ successMessage || 'Operación exitosa' }}
+  </div>
+  
+  <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+    {{ errorMessage || 'Ocurrió un error' }}
+  </div>
+  
+  <div class="map-section">
+    <div id="sigthing-map" class="map-container"></div>
+    <button class="location-btn" (click)="useMyLocation()">
+      <i class="material-icons"></i>
+      Usar mi ubicación
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mdc-card form-card">
+    <h2 class="form-title">Registrar Avistamiento</h2>
+
+    <div class="coordinates-group">
+      <div class="form-field">
+        <label class="mdc-floating-label">Latitud</label>
+        <div class="mdc-text-field mdc-text-field--outlined">
+          <input class="mdc-text-field__input" formControlName="latitude" type="number" step="any">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="mdc-floating-label">Longitud</label>
+        <div class="mdc-text-field mdc-text-field--outlined">
+          <input class="mdc-text-field__input" formControlName="longitude" type="number" step="any">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="mdc-floating-label">País</label>
+      <div class="mdc-text-field mdc-text-field--outlined">
+        <input class="mdc-text-field__input" formControlName="country">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="mdc-floating-label">Ave</label>
+      <div class="mdc-select mdc-select--outlined">
+        <select class="mdc-select__native-control" formControlName="birdId">
+          <option value="" disabled selected>Selecciona un ave</option>
+          <option *ngFor="let b of birds" [value]="b.id">{{ b.commonName }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="mdc-floating-label">Fecha</label>
+      <div class="mdc-text-field mdc-text-field--outlined">
+        <input class="mdc-text-field__input" formControlName="date" type="date">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="mdc-floating-label">Notas</label>
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea">
+        <textarea class="mdc-text-field__input" formControlName="notes" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" 
+              class="mdc-button mdc-button--raised" 
+              [disabled]="isSubmitting || form.invalid"
+              [class.loading]="isSubmitting">
+        <span class="mdc-button__label">Guardar Avistamiento</span>
+      </button>
+    </div>
+  </form>
+
+

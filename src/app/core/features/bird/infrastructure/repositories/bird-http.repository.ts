@@ -10,7 +10,7 @@ import { BirdRepository } from '../../domain/repositories/bird.repository';
 
 //   override addBird(bird: Bird): Promise<Bird> {
 //       throw new Error('Method not implemented.');
-//   }
+//}
 //   override getAllBirds(): Promise<Bird[]> {
 //       throw new Error('Method not implemented.');
 //   }

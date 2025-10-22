@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,13 +6,14 @@ import { BirdRepository } from '../../../../domain/repositories/bird.repository'
 import { AddBirdUseCase } from '../../../../aplication/use-cases/add-bird.use-case';
 import { Bird, BirdFamily, ConservationStatusEnum } from '../../../../domain/entities/bird.interface';
 import { BirdLocalRepository } from '../../../../infrastructure/repositories/bird-local.repository';
+import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
 
 @Component({
   selector: 'app-form-bird',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './form-bird.component.html',
-  styleUrl: './form-bird.component.css',
+  styleUrls: ['./form-bird.component.css'],
   providers: [
     // Asegúrate de proporcionar todos los servicios necesarios
     { provide: BirdRepository, useClass: BirdLocalRepository },
@@ -43,6 +44,9 @@ export class FormBirdComponent implements OnInit {
     private birdRepository: BirdRepository,
     private addBirdUseCase: AddBirdUseCase
   ) {}
+
+
+  formErrors = inject(FormErrorsService);
   
   ngOnInit(): void {
     // Verificar si estamos en modo edición
@@ -111,6 +115,9 @@ export class FormBirdComponent implements OnInit {
   }
   
   async onSubmit(): Promise<void> {
+    // clear previous server-side errors
+    this.formErrors.clearServerErrors(this.birdForm);
+
     if (this.birdForm.invalid) {
       this.markFormGroupTouched(this.birdForm);
       return;
@@ -133,6 +140,14 @@ export class FormBirdComponent implements OnInit {
       }
       
     } catch (err: any) {
+      // map server validation errors if present
+      const payload = err?.errors ?? err;
+      try {
+        this.formErrors.mapServerErrorsToForm(this.birdForm, payload);
+      } catch (mapErr) {
+        // fall back to generic error handling
+      }
+
       // Manejo específico de errores conocidos
       if (err.message?.includes('EXPERT')) {
         this.error = 'Solo usuarios expertos pueden agregar o modificar aves';
