@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, OnDestroy, OnI
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BirdRepository } from '../../../../domain/repositories/bird.repository';
+import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
 import { AddSightingUseCase } from '../../../../aplication/use-cases/add-sighting.use-case';
 import { CommonModule } from '@angular/common';
 import { Bird } from '../../../../domain/entities/bird.interface';
@@ -25,6 +26,8 @@ export class FormSighting implements OnInit, OnDestroy {
   private addSighting: AddSightingUseCase = inject(AddSightingUseCase);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  // expose form errors utility for template usage
+  formErrors = inject(FormErrorsService);
   
   private messageTimeout?: number;
 
@@ -118,6 +121,8 @@ export class FormSighting implements OnInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
+    // clear any previous server validation errors
+    this.formErrors.clearServerErrors(this.form);
     
     this.isSubmitting = true;
     this.cdr.markForCheck();
@@ -171,6 +176,11 @@ export class FormSighting implements OnInit, OnDestroy {
       }
 
     } catch (err: any) {
+      // map server validation errors (expected shape: { field: 'msg' } or { field: ['msg1','msg2'] })
+      const payload = err?.errors ?? err;
+      this.formErrors.mapServerErrorsToForm(this.form, payload);
+      this.cdr.detectChanges();
+      
       setTimeout(() => {
         this.errorMessage = err?.message || 'Error al guardar el avistamiento.';
         this.successMessage = null;

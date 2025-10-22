@@ -9,7 +9,8 @@ export interface Sighting {
     };
     country: string;
     bird: Bird;
-    date: Date;
+    created_at: Date; 
+    updated_at: Date;
     notes?: string;
 
 }

@@ -7,6 +7,7 @@ const STORAGE_KEY = 'sightings_store_v1';
 
 @Injectable()
 export class SightingLocalRepository implements SightingRepository {
+ 
   private readAll(): Sighting[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -15,14 +16,16 @@ export class SightingLocalRepository implements SightingRepository {
       return [];
     }
   }
+
   private writeAll(items: Sighting[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }
 
-  async addSighting(sighting: Sighting): Promise<Sighting> {
+  async addSighting(sighting: Omit<Sighting, 'id' | 'created_at' | 'updated_at'>): Promise<Sighting> {
     const items = this.readAll();
     const id = crypto?.randomUUID?.() ?? Date.now().toString();
-    const saved: Sighting = { ...sighting, id };
+    const now = new Date();
+    const saved: Sighting = { ...sighting, id, created_at: now, updated_at: now };
     items.push(saved);
     this.writeAll(items);
     return saved;
@@ -30,6 +33,10 @@ export class SightingLocalRepository implements SightingRepository {
 
   async getAllSightings(): Promise<Sighting[]> {
     return this.readAll();
+  }
+
+  async getSightingByBirdId(birdId: string): Promise<Sighting[]> {
+    return this.readAll().filter(s => s.id === birdId);
   }
 
   async getSightingById(id: string): Promise<Sighting | null> {

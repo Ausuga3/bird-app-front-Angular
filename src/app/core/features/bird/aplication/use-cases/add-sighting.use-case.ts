@@ -26,7 +26,8 @@ export class AddSightingUseCase {
       coordinates: dto.coordinates,
       country: dto.country,
       bird,
-      date: new Date(dto.date),
+      created_at: new Date(dto.date),
+      updated_at: new Date(dto.date),
       notes: dto.notes
     };
 
