@@ -32,6 +32,17 @@ export const routes: Routes = [
       loadComponent: () =>
          import('./core/features/bird/presentation/pages/list-bird-page/list-bird-page.component').then(m => m.ListBirdPageComponent)
     },
+    
+    {
+      path: 'sightings',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/pages/list-sighting-bird-page/list-sighting-bird-page').then(m => m.ListSightingBirdPage)
+    },
+    {
+      path: 'sightings/add',
+      loadComponent: () =>
+         import('./core/features/bird/presentation/pages/sighting-bird-page/sighting-bird-page').then(m => m.SightingBirdPage)
+    },
     {
       path:'**',
       redirectTo:''
