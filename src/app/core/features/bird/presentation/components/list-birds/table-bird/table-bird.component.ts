@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Bird } from '../../../../domain/entities/bird.interface';
 import { BirdRepository } from '../../../../domain/repositories/bird.repository';
 import { BirdLocalRepository } from '../../../../infrastructure/repositories/bird-local.repository';
+import { RolEnum } from '../../../../../user/domain/entities/rol.interface';
+import { AuthStateService } from '../../../../../../shared/services/auth-state.service';
 
 @Component({
   selector: 'app-table-bird',
@@ -17,6 +19,14 @@ import { BirdLocalRepository } from '../../../../infrastructure/repositories/bir
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableBirdComponent implements OnInit {
+private authState = inject(AuthStateService);
+//metodo para verificar si el usuario es admin
+
+ protected canEditOrDelete(): boolean {
+    const user = this.authState.getUser();
+    return user?.rol.name === RolEnum.USER || !user ? false : true;
+ }
+   
   protected birds = signal<Bird[]>([]);
   protected isLoading = signal<boolean>(true);
   protected error = signal<string | null>(null);

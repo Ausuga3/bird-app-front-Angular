@@ -1,0 +1,45 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="flip-card mx-auto">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img [src]="user?.rol?.name === 'expert' ? 'https://randomuser.me/api/portraits/women/65.jpg' : 'https://randomuser.me/api/portraits/men/81.jpg'" alt="Profile" class="profile-img">
+                        <h3>{{ user?.name ?? 'No encuentro nombre' }}</h3>
+                        <p>{{ user?.email ?? 'no encuentro gmail' }}</p>
+                        <p class="mt-2"><strong>Rol:</strong> {{ user?.rol?.name ?? '—' }}</p>
+                        <p class="mt-3">
+                            <span class="waving-hand">👋</span> Aquí está tu perfil
+                        </p>
+                    </div>
+                    <div class="flip-card-back">
+                        <h3>Acciones</h3>
+                        @if(!user){
+                            <p>Inicia sesión para ver y solicitar cambios.</p>
+                        }
+                        @if(isUser()) {
+                            <div class="text-start">
+                                <label for="roleSelect" class="form-label">Solicitar rol:</label>
+                                <div class="d-flex gap-2 mb-3">
+                                    <select id="roleSelect" class="form-select" [(ngModel)]="desiredRole">
+                                        <option [value]="'expert'">Experto</option>
+                                    </select>
+                                    <button class="btn btn-primary" (click)="requestRoleChange()" [disabled]="requesting">Solicitar cambio</button>
+                                </div>
+                            
+                                @if(requestMessage) {
+                                    <p class="small text-success"> {{requestMessage}}</p>
+                                }
+                                <hr />
+                                <p class="small"><strong>Información:</strong></p>
+                                
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

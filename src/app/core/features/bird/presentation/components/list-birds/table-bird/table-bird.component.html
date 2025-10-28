@@ -1,7 +1,9 @@
 <div class="table-container">
     <div class="table-header">
         <h2>Listado de Aves</h2>
-        <button class="btn-add" (click)="goToAddBird()">+ Agregar Ave</button>
+        @if(canEditOrDelete()){
+            <button class="btn-add" (click)="goToAddBird()">+ Agregar Ave</button>
+        }
     </div>
 
     @if (error()) {
@@ -30,7 +32,11 @@
                         <th>Nombre Científico</th>
                         <th>Familia</th>
                         <th>Estado de Conservación</th>
-                        <th>Acciones</th>
+                        @if(canEditOrDelete()) {
+                            <th class="actions-column-header">Acciones</th>
+                        }
+
+
                     </tr>
                 </thead>
                 <tbody>
@@ -44,14 +50,16 @@
                                     {{ bird.conservationStatus }}
                                 </span>
                             </td>
-                            <td class="actions-column">
-                                <button class="btn-edit" (click)="editBird(bird.id)">
-                                    <span class="icon">✏️</span> Editar
-                                </button>
-                                <button class="btn-delete" (click)="deleteBird(bird.id)">
-                                    <span class="icon">🗑️</span> Eliminar
-                                </button>
-                            </td>
+                            @if (canEditOrDelete()) {
+                                <td class="actions-column">
+                                    <button class="btn-edit" (click)="editBird(bird.id)">
+                                        <span class="icon">✏️</span> Editar
+                                    </button>
+                                    <button class="btn-delete" (click)="deleteBird(bird.id)">
+                                        <span class="icon">🗑️</span> Eliminar
+                                    </button>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

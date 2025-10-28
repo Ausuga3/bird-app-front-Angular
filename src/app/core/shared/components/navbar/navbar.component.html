@@ -4,12 +4,16 @@
       <a class="navbar-brand" routerLink="/">Aves</a>
       <a class="navbar-brand" routerLink="birds">Aves registradas</a>
       <a class="navbar-brand" routerLink="sightings">Avistamientos</a>
+      @if(isAdmin()){
+        <a class="navbar-brand" routerLink="admin">Admin</a>
+
+      }
     </div>
 
 
     @if (isAuthenticated()) {
       <div class="d-flex gap-2">
-        <button routerLink="/perfil" class="btn btn-outline-primary" type="button">Mi perfil</button>
+        <button routerLink="mi-perfil" class="btn btn-outline-primary" type="button">Mi perfil</button>
         <button (click)="onLogout()" class="btn btn-outline-danger" type="button">Cerrar sesión</button>
       </div>
     } @else {

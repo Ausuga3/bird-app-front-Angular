@@ -66,7 +66,6 @@ export class LoginComponent {
   try { console.log('[LoginComponent] authState setAuthenticated ->', this.authState.isAuthenticated()); } catch {}
         await this.router.navigate(['/'], { replaceUrl: true });
       }else{
-        // Puede deberse a credenciales inválidas o a que ya existe una sesión activa
         this.errorMessage = 'Credenciales inválidas o ya existe una sesión activa.';
       }
     }catch (error) {

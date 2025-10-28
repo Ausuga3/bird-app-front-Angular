@@ -11,3 +11,9 @@ export interface LoginUserDto{
     email: string;
     password: string;
 }
+
+export interface ChangeRoleDto{
+    actorId: string; // admin
+    targetUserId: string; //usuario al que le vamos a cambiar el rol
+    newRol: RolEnum;
+}

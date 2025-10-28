@@ -44,6 +44,16 @@ export const routes: Routes = [
          import('./core/features/sighting/presentation/pages/sighting-page/sighting-page').then(m => m.SightingPage)
     },
     {
+      path: 'mi-perfil',
+      loadComponent: () =>
+         import('./core/features/user/presentation/pages/mi-perfil-page/mi-perfil-page')
+    },
+    {
+      path: 'admin',
+      loadComponent: () =>
+         import('./core/features/user/presentation/pages/admin/admin').then(m => m.Admin)
+    },
+    {
       path:'**',
       redirectTo:''
     }
