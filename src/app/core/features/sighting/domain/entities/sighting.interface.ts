@@ -1,5 +1,4 @@
-import { Bird } from "./bird.interface";
-
+import { Bird } from "../../../bird/domain/entities/bird.interface";
 
 export interface Sighting {
     id?: string;
@@ -12,5 +11,4 @@ export interface Sighting {
     created_at: Date; 
     updated_at: Date;
     notes?: string;
-
 }

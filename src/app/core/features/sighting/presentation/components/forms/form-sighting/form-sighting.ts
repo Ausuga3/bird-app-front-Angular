@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BirdRepository } from '../../../../domain/repositories/bird.repository';
+import { BirdRepository } from '../../../../../bird/domain/repositories/bird.repository';
 import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
 import { AddSightingUseCase } from '../../../../aplication/use-cases/add-sighting.use-case';
 import { CommonModule } from '@angular/common';
-import { Bird } from '../../../../domain/entities/bird.interface';
-import type { Map, Marker, LeafletMouseEvent } from 'leaflet';
+import { Bird } from '../../../../../bird/domain/entities/bird.interface';
+import type { Map, Marker } from 'leaflet';
 import { Subscription } from 'rxjs';
-
 
 let L: typeof import('leaflet') | null = null;
 
@@ -26,7 +25,6 @@ export class FormSighting implements OnInit, OnDestroy {
   private addSighting: AddSightingUseCase = inject(AddSightingUseCase);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
-  // expose form errors utility for template usage
   formErrors = inject(FormErrorsService);
   
   private messageTimeout?: number;
@@ -43,7 +41,6 @@ export class FormSighting implements OnInit, OnDestroy {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   private valueChangesSub?: Subscription;
-
 
   map?: Map;
   marker?: Marker;
@@ -63,7 +60,6 @@ export class FormSighting implements OnInit, OnDestroy {
     });
 
     if (isPlatformBrowser(this.platformId)) {
-      // Cargamos Leaflet solo en el navegador
       const leaflet = await import('leaflet');
       L = leaflet.default;
       setTimeout(() => this.initMap(), 0);
@@ -121,7 +117,6 @@ export class FormSighting implements OnInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
-    // clear any previous server validation errors
     this.formErrors.clearServerErrors(this.form);
     
     this.isSubmitting = true;
@@ -140,14 +135,12 @@ export class FormSighting implements OnInit, OnDestroy {
       });
 
       console.log('Avistamiento guardado correctamente, asignando successMessage');
-      // Forzar un pequeño retraso para asegurar que la UI se actualiza
       setTimeout(() => {
         this.successMessage = 'Avistamiento guardado correctamente.';
         this.errorMessage = null;
         console.log('Estado actual - successMessage:', this.successMessage);
-        this.cdr.detectChanges(); // Usar detectChanges en lugar de markForCheck para forzar actualización
+        this.cdr.detectChanges();
         
-        // Auto-limpieza de mensajes después de 20 segundos
         window.clearTimeout(this.messageTimeout);
         this.messageTimeout = window.setTimeout(() => {
           this.successMessage = null;
@@ -165,7 +158,6 @@ export class FormSighting implements OnInit, OnDestroy {
         date: new Date().toISOString().substring(0, 10),
         notes: ''
       });
-
       
       if (this.marker) {
         this.marker.remove();
@@ -176,7 +168,6 @@ export class FormSighting implements OnInit, OnDestroy {
       }
 
     } catch (err: any) {
-      // map server validation errors (expected shape: { field: 'msg' } or { field: ['msg1','msg2'] })
       const payload = err?.errors ?? err;
       this.formErrors.mapServerErrorsToForm(this.form, payload);
       this.cdr.detectChanges();
@@ -186,7 +177,6 @@ export class FormSighting implements OnInit, OnDestroy {
         this.successMessage = null;
         this.cdr.detectChanges();
         
-        // Auto-limpieza de mensajes después de 20 segundos para error también
         window.clearTimeout(this.messageTimeout);
         this.messageTimeout = window.setTimeout(() => {
           this.successMessage = null;
@@ -212,9 +202,4 @@ export class FormSighting implements OnInit, OnDestroy {
       window.clearTimeout(this.messageTimeout);
     }
   }
-
-  
-
-
-  
- }
+}
