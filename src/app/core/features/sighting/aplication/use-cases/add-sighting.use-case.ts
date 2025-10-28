@@ -1,9 +1,8 @@
 import { Injectable } from "@angular/core";
-import { SightingRepository } from "../../domain/repositories/sighiting.repository";
-import { BirdRepository } from "../../domain/repositories/bird.repository";
+import { SightingRepository } from "../../domain/repositories/sighting.repository";
+import { BirdRepository } from "../../../bird/domain/repositories/bird.repository";
 import { CreateSightingDto } from "../dto/sighting.dto";
 import { Sighting } from "../../domain/entities/sighting.interface";
-
 
 @Injectable({ providedIn: 'root' })
 export class AddSightingUseCase {

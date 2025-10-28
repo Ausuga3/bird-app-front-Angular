@@ -36,12 +36,12 @@ export const routes: Routes = [
     {
       path: 'sightings',
       loadComponent: () =>
-         import('./core/features/bird/presentation/pages/list-sighting-bird-page/list-sighting-bird-page').then(m => m.ListSightingBirdPage)
+         import('./core/features/sighting/presentation/pages/list-sigthing-page/list-sigthing-page').then(m => m.ListSighting)
     },
     {
       path: 'sightings/add',
       loadComponent: () =>
-         import('./core/features/bird/presentation/pages/sighting-bird-page/sighting-bird-page').then(m => m.SightingBirdPage)
+         import('./core/features/sighting/presentation/pages/sighting-page/sighting-page').then(m => m.SightingPage)
     },
     {
       path:'**',

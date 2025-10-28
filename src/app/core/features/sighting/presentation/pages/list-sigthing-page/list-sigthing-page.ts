@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { BirdRepository } from '../../../domain/repositories/bird.repository';
-import { Bird } from '../../../domain/entities/bird.interface';
-import { GetSightingsUseCase } from '../../../../sighting/aplication/use-cases/list-sighting.use-case';
-import { Sighting } from '../../../../sighting/domain/entities/sighting.interface';
+import { Sighting } from '../../../domain/entities/sighting.interface';
+import { GetSightingsUseCase } from '../../../aplication/use-cases/list-sighting.use-case';
+import { BirdRepository } from '../../../../bird/domain/repositories/bird.repository';
+import { Bird } from '../../../../bird/domain/entities/bird.interface';
 
 interface SightingWithBirdName extends Sighting {
   birdName: string;
@@ -15,8 +15,8 @@ interface SightingWithBirdName extends Sighting {
   selector: 'app-list-sighting',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-  templateUrl: './list-sighting.html',
-  styleUrls: ['./list-sighting.css'],
+  templateUrl: 'list-sigthing-page.html',
+  styleUrls: ['list-sigthing-page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListSighting implements OnInit { 

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Sighting } from '../../domain/entities/sighting.interface';
-import { SightingRepository } from '../../domain/repositories/sighiting.repository';
-
+import { SightingRepository } from '../../domain/repositories/sighting.repository';
 
 const STORAGE_KEY = 'sightings_store_v1';
 
@@ -36,7 +35,7 @@ export class SightingLocalRepository implements SightingRepository {
   }
 
   async getSightingByBirdId(birdId: string): Promise<Sighting[]> {
-    return this.readAll().filter(s => s.id === birdId);
+    return this.readAll().filter(s => s.bird.id === birdId);
   }
 
   async getSightingById(id: string): Promise<Sighting | null> {
