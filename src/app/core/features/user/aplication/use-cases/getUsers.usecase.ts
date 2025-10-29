@@ -45,6 +45,7 @@ export class GetUsersUseCase {
 
 		const updated: User = { ...target, isActive: enable };
 		return await this.userRepository.updateUser(updated);
+        
 	}
 }
 
