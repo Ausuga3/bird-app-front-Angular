@@ -17,3 +17,17 @@ export interface ChangeRoleDto{
     targetUserId: string; //usuario al que le vamos a cambiar el rol
     newRol: RolEnum;
 }
+
+export interface UpdateUserDto{
+    userId: string;
+    name?: string;
+    email?: string;
+
+}
+
+export interface getUsersDto{
+    userId: string;
+    rolName?: RolEnum;
+    name: string;
+    email: string;
+}

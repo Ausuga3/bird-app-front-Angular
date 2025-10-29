@@ -1,1 +1,69 @@
-<p>user-list works!</p>,
+<div class="table-container">
+  <div class="table-header">
+    <h2>Usuarios</h2>
+  </div>
+
+  <div class="filters-container">
+    <input type="text" [formControl]="searchControl" placeholder="Buscar por nombre o email" class="search-input" />
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-message">
+      <i class="material-icons">error</i>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  @if (!loading() && !error() && filteredUsers().length > 0) {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            @if(isAdmin()) { <th class="actions-column-header">Acciones</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of filteredUsers(); track user.id) {
+            <tr>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ formatRole(user.rol) }}</td>
+              <td>
+                <span class="status" [ngClass]="user.isActive ? 'active' : 'inactive'">{{ user.isActive ? 'Activo' : 'Deshabilitado' }}</span>
+              </td>
+              @if(isAdmin()) {
+                <td class="actions-column">
+                  <button class="btn btn-toggle" (click)="toggleActive(user)" title="Activar/Desactivar">
+                    @if(user.isActive) { <span class="icon">🔒</span> Deshabilitar } @else { <span class="icon">🔓</span> Activar }
+                  </button>
+                  @if(requestedExpertIds().includes(user.id) && user.rol.name !== 'expert') {
+                    <button class="btn-approve" (click)="approveExpert(user)" title="Aprobar como experto">Hacer experto</button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (!loading() && !error() && filteredUsers().length === 0) {
+    <div class="empty-state">
+      <i class="material-icons">search_off</i>
+      <p>No se encontraron usuarios</p>
+    </div>
+  }
+</div>
+
