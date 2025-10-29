@@ -64,4 +64,9 @@ export class UserRepositoryMock implements UserRepository {
         return user;
     }
 
+    async getUsers(user: User): Promise<User[]> {
+        const users = this.dataSource.getAll() || [];
+        return users;
+    }
+
 }
