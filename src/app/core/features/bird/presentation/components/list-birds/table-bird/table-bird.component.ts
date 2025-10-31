@@ -12,7 +12,6 @@ import { AuthStateService } from '../../../../../../shared/services/auth-state.s
   standalone: true,
   imports: [CommonModule],
   templateUrl: './table-bird.component.html',
-  styleUrl: './table-bird.component.css',
   providers: [
     { provide: BirdRepository, useClass: BirdLocalRepository }
   ],
