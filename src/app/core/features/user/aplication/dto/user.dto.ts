@@ -18,6 +18,12 @@ export interface ChangeRoleDto{
     newRol: RolEnum;
 }
 
+export interface ChangeActiveDto{
+    actorId: string; // admin que hace el cambio
+    targetUserId: string; // usuario objetivo
+    isActive: boolean; // nuevo estado
+}
+
 export interface UpdateUserDto{
     userId: string;
     name?: string;

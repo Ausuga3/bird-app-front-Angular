@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SESSION_REPOSITORY } from '../../../domain/repositories/token-sesion';
@@ -19,6 +19,7 @@ export class MiPerfil implements OnInit {
   private readonly sessionRepo = inject(SESSION_REPOSITORY) as SessionRepository;
   private readonly userRepo = inject(USER_REPOSITORY) as UserRepository;
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   requesting = false;
@@ -35,12 +36,13 @@ export class MiPerfil implements OnInit {
       if (!session) return;
       const current = await this.userRepo.getUserById(session.userId);
       this.user = current;
+      this.cdr.markForCheck();
     } catch (err) {
       console.error('Error cargando perfil:', err);
     }
   }
 
-  // Guarda una solicitud local de cambio de rol (para enviar a admin o procesar)
+
   requestRoleChange(): void {
     if (!this.user || !this.isBrowser) return;
     this.requesting = true;
@@ -70,7 +72,7 @@ export class MiPerfil implements OnInit {
     this.desiredRole = this.desiredRole === RolEnum.EXPERT ? RolEnum.USER : RolEnum.EXPERT;
   }
 
-  protected isUser(){
+  public isUser(): boolean {
     return this.user?.rol.name === RolEnum.USER;
   }
 }

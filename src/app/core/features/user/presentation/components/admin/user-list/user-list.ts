@@ -13,7 +13,6 @@ import { RolEnum } from '../../../../domain/entities/rol.interface';
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './user-list.html',
-  styleUrls: ['./user-list.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserList implements OnInit {

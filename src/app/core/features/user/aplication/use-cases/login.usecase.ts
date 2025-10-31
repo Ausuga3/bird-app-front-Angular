@@ -11,11 +11,10 @@ export class LoginUserUseCase {
     private readonly userRepository = inject(USER_REPOSITORY);
     private readonly sessionRepository = inject(SESSION_REPOSITORY);
 
+
     async execute(dto: LoginUserDto): Promise<User | null> {
       const active = await this.sessionRepository.getActive();
       if (active) {
-        // Hay una sesión activa: no permitir nuevo login
-        // Devolver null para indicar que la acción no se permitió
         return null;
       }
 
@@ -23,7 +22,14 @@ export class LoginUserUseCase {
 
 
     const user = await this.userRepository.getUserByEmail(dto.email);
+    // no existe o no tiene contraseña
     if (!user || !user.hashedPassword) return null;
+
+    // Usuario deshabilitado no puede loguearse
+    if (user.isActive === false) {
+      try { console.log('[LoginUserUseCase] login attempt for disabled user', user.id); } catch {}
+      return null;
+    }
 
     const isValid = UserDomainService.verifyPassword(user.hashedPassword, dto.password );
     if (!isValid) return null;

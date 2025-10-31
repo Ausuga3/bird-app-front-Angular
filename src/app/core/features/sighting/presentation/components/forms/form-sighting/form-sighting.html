@@ -1,12 +1,5 @@
 <div class="form-container">
-  <!-- Alertas fuera de condicionales para debug -->
-  <div class="alert alert-success" role="alert" *ngIf="successMessage">
-    {{ successMessage || 'Operación exitosa' }}
-  </div>
   
-  <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
-    {{ errorMessage || 'Ocurrió un error' }}
-  </div>
   
   <div class="map-section">
     <div id="sigthing-map" class="map-container"></div>
@@ -74,4 +67,13 @@
         <span class="mdc-button__label">Guardar Avistamiento</span>
       </button>
     </div>
+
+    
+  <div class="alert alert-success" role="alert" *ngIf="successMessage">
+    {{ successMessage || 'Operación exitosa' }}
+  </div>
+  
+  <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+    {{ errorMessage || 'Ocurrió un error' }}
+  </div>
   </form>

@@ -16,7 +16,6 @@ interface SightingWithBirdName extends Sighting {
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: 'list-sigthing-page.html',
-  styleUrls: ['list-sigthing-page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListSighting implements OnInit { 

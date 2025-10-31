@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BirdRepository } from '../../../../../bird/domain/repositories/bird.repository';
 import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
+import { AuthStateService } from '../../../../../../shared/services/auth-state.service';
 import { AddSightingUseCase } from '../../../../aplication/use-cases/add-sighting.use-case';
 import { CommonModule } from '@angular/common';
 import { Bird } from '../../../../../bird/domain/entities/bird.interface';
@@ -26,6 +27,7 @@ export class FormSighting implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
   formErrors = inject(FormErrorsService);
+  private authState = inject(AuthStateService);
   
   private messageTimeout?: number;
 
@@ -117,6 +119,16 @@ export class FormSighting implements OnInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
+
+    const isBrowser = isPlatformBrowser(this.platformId);
+    const loggedIn = isBrowser ? this.authState.isAuthenticated() : false;
+    if (!loggedIn) {
+      this.errorMessage = 'Tienes que iniciar sesión para registrar un avistamiento.';
+      this.successMessage = null;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.formErrors.clearServerErrors(this.form);
     
     this.isSubmitting = true;
@@ -133,23 +145,24 @@ export class FormSighting implements OnInit, OnDestroy {
         date: this.form.value.date,
         notes: this.form.value.notes
       });
-
-      console.log('Avistamiento guardado correctamente, asignando successMessage');
-      setTimeout(() => {
-        this.successMessage = 'Avistamiento guardado correctamente.';
-        this.errorMessage = null;
-        console.log('Estado actual - successMessage:', this.successMessage);
-        this.cdr.detectChanges();
-        
-        window.clearTimeout(this.messageTimeout);
-        this.messageTimeout = window.setTimeout(() => {
-          this.successMessage = null;
-          this.errorMessage = null;
-          this.cdr.detectChanges();
-          console.log('Mensajes limpiados automáticamente');
-        }, 20000);
-      }, 100);
       
+      // Mensaje de éxito: asignar inmediatamente y forzar detección.
+      this.successMessage = 'Avistamiento guardado correctamente.';
+      this.errorMessage = null;
+      console.log('Estado actual - successMessage:', this.successMessage);
+      this.cdr.detectChanges();
+
+      // Reiniciar temporizador de limpieza
+      window.clearTimeout(this.messageTimeout);
+      this.messageTimeout = window.setTimeout(() => {
+        this.successMessage = null;
+        this.errorMessage = null;
+        this.cdr.detectChanges();
+        console.log('Mensajes limpiados automáticamente');
+      }, 20000);
+
+      // Resetear el formulario sin emitir eventos para que la suscripción a
+      // valueChanges no borre el mensaje de éxito inmediatamente.
       this.form.reset({
         latitude: null,
         longitude: null,
@@ -157,7 +170,7 @@ export class FormSighting implements OnInit, OnDestroy {
         birdId: null,
         date: new Date().toISOString().substring(0, 10),
         notes: ''
-      });
+      }, { emitEvent: false });
       
       if (this.marker) {
         this.marker.remove();
@@ -172,19 +185,18 @@ export class FormSighting implements OnInit, OnDestroy {
       this.formErrors.mapServerErrorsToForm(this.form, payload);
       this.cdr.detectChanges();
       
-      setTimeout(() => {
-        this.errorMessage = err?.message || 'Error al guardar el avistamiento.';
+      // Mostrar mensaje de error inmediatamente
+      this.errorMessage = err?.message || 'Error al guardar el avistamiento.';
+      this.successMessage = null;
+      this.cdr.detectChanges();
+
+      window.clearTimeout(this.messageTimeout);
+      this.messageTimeout = window.setTimeout(() => {
         this.successMessage = null;
+        this.errorMessage = null;
         this.cdr.detectChanges();
-        
-        window.clearTimeout(this.messageTimeout);
-        this.messageTimeout = window.setTimeout(() => {
-          this.successMessage = null;
-          this.errorMessage = null;
-          this.cdr.detectChanges();
-          console.log('Mensajes de error limpiados automáticamente');
-        }, 20000);
-      }, 100);
+        console.log('Mensajes de error limpiados automáticamente');
+      }, 20000);
     } finally {
       this.isSubmitting = false;
       this.cdr.detectChanges();
