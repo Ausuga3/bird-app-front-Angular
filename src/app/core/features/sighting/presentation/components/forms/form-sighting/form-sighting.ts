@@ -1,14 +1,19 @@
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, OnDestroy, OnInit, ChangeDetectorRef, Input, EventEmitter, Output } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BirdRepository } from '../../../../../bird/domain/repositories/bird.repository';
 import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
 import { AuthStateService } from '../../../../../../shared/services/auth-state.service';
 import { AddSightingUseCase } from '../../../../aplication/use-cases/add-sighting.use-case';
+import { UpdateSightingUseCase } from '../../../../aplication/use-cases/edit-sighting.use-case';
+import { SightingRepository } from '../../../../domain/repositories/sighting.repository';
 import { CommonModule } from '@angular/common';
 import { Bird } from '../../../../../bird/domain/entities/bird.interface';
 import type { Map, Marker } from 'leaflet';
 import { Subscription } from 'rxjs';
+import { Sighting } from '../../../../domain/entities/sighting.interface';
+import { OutgoingMessage } from 'http';
+import { ActivatedRoute } from '@angular/router';
 
 let L: typeof import('leaflet') | null = null;
 
@@ -20,16 +25,32 @@ let L: typeof import('leaflet') | null = null;
   styleUrls: ['./form-sighting.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class FormSighting implements OnInit, OnDestroy {
+
+ 
   private fb = inject(FormBuilder);
   private birdRepo: BirdRepository = inject(BirdRepository);
   private addSighting: AddSightingUseCase = inject(AddSightingUseCase);
+  private updateSighting: UpdateSightingUseCase = inject(UpdateSightingUseCase);
+  private sightingRepo: SightingRepository = inject(SightingRepository as any);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
-  formErrors = inject(FormErrorsService);
+  private formErrors = inject(FormErrorsService);
   private authState = inject(AuthStateService);
-  
   private messageTimeout?: number;
+  
+  constructor(
+    private route: ActivatedRoute,
+  ){}
+
+  @Input() sightingId: string | null = null;
+  @Input() sighting: Sighting | null = null;
+  @Output() saved = new EventEmitter<Sighting>();
+  @Output() canceled = new EventEmitter<void>();
+  isEditMode = false;
+  pageTitle = 'Registrar nuevo avistamiento';
+
 
   form: FormGroup = this.fb.group({
     latitude: [null, [Validators.required, Validators.min(-90), Validators.max(90)]],
@@ -54,6 +75,7 @@ export class FormSighting implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    const routeId = this.route.snapshot.paramMap.get('id');
     await this.loadBirds();
 
     this.valueChangesSub = this.form.valueChanges.subscribe(() => {
@@ -65,6 +87,35 @@ export class FormSighting implements OnInit, OnDestroy {
       const leaflet = await import('leaflet');
       L = leaflet.default;
       setTimeout(() => this.initMap(), 0);
+    }
+
+    // Si tenemos un id via route param o via @Input, cargar avistamiento para editar
+    const idToLoad = this.sightingId || routeId;
+    if (idToLoad) {
+      try {
+        const existing = await this.sightingRepo.getSightingById(idToLoad);
+        if (existing) {
+          this.isEditMode = true;
+          this.pageTitle = 'Editar avistamiento';
+          this.sighting = existing;
+          // setear valores en el formulario
+          this.form.patchValue({
+            latitude: existing.coordinates?.latitude ?? null,
+            longitude: existing.coordinates?.longitude ?? null,
+            country: existing.country ?? '',
+            birdId: existing.bird?.id ?? null,
+            date: existing.created_at ? new Date(existing.created_at).toISOString().substring(0,10) : new Date().toISOString().substring(0,10),
+            notes: existing.notes ?? ''
+          }, { emitEvent: false });
+
+          // Si el mapa ya está listo, colocar marcador
+          if (existing.coordinates && this.map) {
+            this.setMarker(existing.coordinates.latitude, existing.coordinates.longitude);
+          }
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar avistamiento para edición', err);
+      }
     }
   }
 
@@ -134,8 +185,7 @@ export class FormSighting implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.cdr.markForCheck();
     try {
-      console.log('Ejecutando addSighting.execute()');
-      await this.addSighting.execute({
+      const dto = {
         coordinates: {
           latitude: this.form.value.latitude,
           longitude: this.form.value.longitude
@@ -144,7 +194,20 @@ export class FormSighting implements OnInit, OnDestroy {
         birdId: this.form.value.birdId,
         date: this.form.value.date,
         notes: this.form.value.notes
-      });
+      };
+
+      if (this.isEditMode && (this.sightingId || this.sighting?.id)) {
+        const id = this.sightingId || this.sighting?.id!;
+        console.log('Ejecutando updateSighting.execute()', id, dto);
+        const updated = await this.updateSighting.execute(id, dto as any);
+        // Emitir para que la página o list pueda reaccionar
+        this.saved.emit(updated);
+        this.successMessage = 'Avistamiento actualizado correctamente.';
+      } else {
+        console.log('Ejecutando addSighting.execute()');
+        await this.addSighting.execute(dto as any);
+        this.successMessage = 'Avistamiento guardado correctamente.';
+      }
       
       // Mensaje de éxito: asignar inmediatamente y forzar detección.
       this.successMessage = 'Avistamiento guardado correctamente.';

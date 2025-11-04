@@ -25,12 +25,14 @@ export class RegisterUserUseCase {
     name: dto.name,
     email: dto.email,
     hashedPassword,
-    isActive: false,
+    isActive: true,
     date: new Date(),
     rol: role
   };
 
-  const createdUser = await this.userRepository.register(newUser);
-  return UserDomainService.activateUser(createdUser);
+  // Activar el usuario antes de registrarlo
+  const activatedUser = UserDomainService.activateUser(newUser);
+  const createdUser = await this.userRepository.register(activatedUser);
+  return createdUser;
  }
 }

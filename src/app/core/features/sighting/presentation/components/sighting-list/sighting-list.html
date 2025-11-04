@@ -61,6 +61,13 @@
               <td>{{ sighting.notes || '-' }}</td>
               @if(canSeeActions(sighting)){
               <td>
+                <a
+                  class="btn btn-sm btn-secondary me-2"
+                  [routerLink]="['/sightings','edit', sighting.id]"
+                  title="Editar"
+                >
+                  ✏️ Editar
+                </a>
                 <button
                   class="btn btn-sm btn-danger"
                   (click)="deleteSighting(sighting.id || '')"

@@ -6,4 +6,5 @@ export abstract class SightingRepository {
   abstract getSightingById(id: string): Promise<Sighting | null>;
   abstract deleteSighting(id: string): Promise<void>;
   abstract getSightingByBirdId(birdId: string): Promise<Sighting[]>;
+  abstract editSighting(id: string, patch: Partial<Sighting>): Promise<Sighting>;
 }
