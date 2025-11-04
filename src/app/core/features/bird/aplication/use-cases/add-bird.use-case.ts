@@ -15,26 +15,22 @@ export class AddBirdUseCase {
   ) {}
 
   async execute(dto: AddBirdDto): Promise<Bird> {
-    // 1. Verificar autorización
-    const currentUser = await this.authState.getUser();
-    // if (!currentUser || currentUser.rol.name !== RolEnum.EXPERT) {
-    //   throw new Error('Solo usuarios EXPERT pueden agregar aves');
-    // }
 
-    // 2. Validar datos
+    const currentUser = await this.authState.getUser();
     this.validateBirdDto(dto);
 
-    // 3. Crear entidad Bird
+
     const now = new Date();
     const bird: Bird = {
-      id: crypto.randomUUID(), // Generamos UUID único
+      id: crypto.randomUUID(),
       commonName: dto.commonName,
       scientificName: dto.scientificName,
       family: dto.family,
       notes: dto.notes,
       conservationStatus: dto.conservationStatus,
       created_at: now,
-      updated_at: now
+      updated_at: now,
+      created_by: currentUser?.id
     };
 
     // 4. Persistir y retornar

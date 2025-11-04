@@ -8,6 +8,8 @@ export interface Sighting {
     };
     country: string;
     bird: Bird;
+    // id del usuario que creó el avistamiento (opcional)
+    created_by?: string;
     created_at: Date; 
     updated_at: Date;
     notes?: string;

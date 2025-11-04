@@ -24,6 +24,7 @@ export class SightingLocalRepository implements SightingRepository {
     const items = this.readAll();
     const id = crypto?.randomUUID?.() ?? Date.now().toString();
     const now = new Date();
+    // Ensure we keep created_by if provided (could be undefined)
     const saved: Sighting = { ...sighting, id, created_at: now, updated_at: now };
     items.push(saved);
     this.writeAll(items);
