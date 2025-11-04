@@ -98,5 +98,10 @@ export class TableBirdComponent implements OnInit {
     if (!bird) return false;
     return bird.created_by === this.user?.id;
   }
+
+  canCreatedBirds(): boolean {
+    if (!this.user) return false;
+    return this.user.rol?.name === 'expert' || this.user.rol?.name === 'admin';
+  }
   
 }

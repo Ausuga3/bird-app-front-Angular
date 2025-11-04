@@ -29,8 +29,8 @@ export class FormBirdComponent implements OnInit {
   successMessage: string | null = null;
   
   // Inputs/Outputs para reutilización del formulario fuera de rutas
-  @Input() birdId: string | null = null; // opcional: id si el padre la pasa
-  @Input() bird: Bird | null = null; // opcional: entidad para editar
+  @Input() birdId: string | null = null;
+  @Input() bird: Bird | null = null; 
   @Output() saved = new EventEmitter<Bird>();
   @Output() canceled = new EventEmitter<void>();
   isEditMode = false;

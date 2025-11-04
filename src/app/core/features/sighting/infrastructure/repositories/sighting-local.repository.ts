@@ -47,4 +47,22 @@ export class SightingLocalRepository implements SightingRepository {
     const items = this.readAll().filter(s => s.id !== id);
     this.writeAll(items);
   }
+
+  // Implementación requerida por la interfaz: editar parcialmente un avistamiento
+  async editSighting(id: string, patch: Partial<Sighting>): Promise<Sighting> {
+    const items = this.readAll();
+    const index = items.findIndex(s => s.id === id);
+    if (index === -1) {
+      throw new Error('Avistamiento no encontrado');
+    }
+    const existing = items[index];
+    const merged: Sighting = {
+      ...existing,
+      ...(patch as Partial<Sighting>),
+      updated_at: new Date(),
+    } as Sighting;
+    items[index] = merged;
+    this.writeAll(items);
+    return merged;
+  }
 }
