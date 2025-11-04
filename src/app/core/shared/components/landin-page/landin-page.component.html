@@ -5,8 +5,8 @@
 		<p class="lead mb-4">Comparte y consulta avistamientos cerca de ti.</p>
 
 		<div class="d-flex gap-3 justify-content-center flex-wrap">
-			<a class="btn btn-primary btn-lg" role="button" routerLink="/reportar">Reportar avistamiento</a>
-			<a class="btn btn-outline-light btn-lg" role="button" routerLink="/consultar">Consultar Avistamientos</a>
+			<a class="btn btn-primary btn-lg" role="button" [routerLink]="'/sightings/add'">Reportar avistamiento</a>
+			<a class="btn btn-outline-light btn-lg" role="button" [routerLink]="'sightings'">Consultar Avistamientos</a>
 		</div>
 	</div>
 </section>

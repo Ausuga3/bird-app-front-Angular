@@ -1,8 +1,8 @@
 import { inject, Injectable } from "@angular/core";
-import { USER_REPOSITORY } from "../../domain/repositories/token";
-import { ChangeRoleDto } from "../dto/user.dto";
-import { User } from "../../domain/entities/user.interface";
-import { Rol, RolEnum } from '../../domain/entities/rol.interface';
+import { USER_REPOSITORY } from "../../../domain/repositories/token";
+import { ChangeRoleDto } from "../../dto/user.dto";
+import { User } from "../../../domain/entities/user.interface";
+import { Rol, RolEnum } from '../../../domain/entities/rol.interface';
 
 @Injectable({providedIn: 'root'})
 export class ChangeRolUseCase {

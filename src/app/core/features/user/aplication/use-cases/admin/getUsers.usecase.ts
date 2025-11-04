@@ -1,9 +1,9 @@
 
 import { inject, Injectable } from "@angular/core";
-import { USER_REPOSITORY } from "../../domain/repositories/token";
-import { getUsersDto } from "../dto/user.dto";
-import { User } from "../../domain/entities/user.interface";
-import { RolEnum } from '../../domain/entities/rol.interface';
+import { USER_REPOSITORY } from "../../../domain/repositories/token";
+import { getUsersDto } from "../../dto/user.dto";
+import { User } from "../../../domain/entities/user.interface";
+import { RolEnum } from '../../../domain/entities/rol.interface';
 
 @Injectable({providedIn: 'root'})
 export class GetUsersUseCase {

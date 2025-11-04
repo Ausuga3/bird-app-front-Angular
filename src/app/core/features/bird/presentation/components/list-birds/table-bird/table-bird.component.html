@@ -2,8 +2,8 @@
     <div class="d-flex align-items-center mb-3">
         <h2 class="mb-0">Listado de Aves</h2>
         <div class="ms-auto">
-            @if(canEditOrDelete()){
-                <button class="btn btn-primary" (click)="goToAddBird()">+ Agregar Ave</button>
+            @if(canSeeActions()){
+                <button routerLink="/birds/add" class="btn btn-primary">Agregar Ave</button>
             }
         </div>
     </div>
@@ -23,7 +23,7 @@
     } @else if (birds().length === 0) {
         <div class="text-center py-4">
             <p>No hay aves registradas todavía.</p>
-            <button class="btn btn-primary" (click)="goToAddBird()">Agregar la primera ave</button>
+            <button routerLink="/birds/add" class="btn btn-primary">Agregar la primera ave</button>
         </div>
     } @else {
         <div class="table-responsive">
@@ -34,7 +34,7 @@
                         <th>Nombre Científico</th>
                         <th>Familia</th>
                         <th>Estado de Conservación</th>
-                        @if(canEditOrDelete()) {
+                        @if(canSeeAnyActions()) {
                             <th>Acciones</th>
                         }
                     </tr>
@@ -46,9 +46,9 @@
                             <td><em>{{ bird.scientificName }}</em></td>
                             <td>{{ bird.family }}</td>
                             <td>
-                                <span class="badge conservation-badge" [ngClass]="'status-' + bird.conservationStatus">{{ bird.conservationStatus }}</span>
+                                <span class="" [ngClass]="'status-' + bird.conservationStatus">{{ bird.conservationStatus }}</span>
                             </td>
-                            @if (canEditOrDelete()) {
+                            @if (canSeeActions(bird)) {
                                 <td>
                                     <button class="btn btn-sm btn-outline-secondary me-2" (click)="editBird(bird.id)">
                                         <span class="icon">✏️</span> Editar
