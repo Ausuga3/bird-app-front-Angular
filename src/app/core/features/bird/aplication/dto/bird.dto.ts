@@ -21,3 +21,12 @@ export interface birdDto{
     created_At?: Date;
     updated_At?: Date;
 }
+
+export interface UpdateBirdDto{
+    commonName?: string;
+    scientificName?: string;
+    family?: BirdFamily;
+    notes?: string;
+    conservationStatus?: ConservationStatusEnum;
+    updated_At?: Date;
+}

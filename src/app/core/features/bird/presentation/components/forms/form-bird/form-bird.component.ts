@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BirdRepository } from '../../../../domain/repositories/bird.repository';
 import { AddBirdUseCase } from '../../../../aplication/use-cases/add-bird.use-case';
+import { UpdateBirdUseCase } from '../../../../aplication/use-cases/update-bird.use-case';
 import { Bird, BirdFamily, ConservationStatusEnum } from '../../../../domain/entities/bird.interface';
 import { BirdLocalRepository } from '../../../../infrastructure/repositories/bird-local.repository';
 import { FormErrorsService } from '../../../../../../shared/forms/form-errors.service';
@@ -17,7 +18,7 @@ import { FormErrorsService } from '../../../../../../shared/forms/form-errors.se
   providers: [
     // Asegúrate de proporcionar todos los servicios necesarios
     { provide: BirdRepository, useClass: BirdLocalRepository },
-    AddBirdUseCase
+    // Use cases are providedIn: 'root' so they don't need to be listed here
     // AuthStateService ya está providenciado en root con { providedIn: 'root' }
   ]
 })
@@ -27,9 +28,11 @@ export class FormBirdComponent implements OnInit {
   error: string | null = null;
   successMessage: string | null = null;
   
-  // Para determinar si estamos en modo edición
-  birdId: string | null = null;
-  bird: Bird | null = null;
+  // Inputs/Outputs para reutilización del formulario fuera de rutas
+  @Input() birdId: string | null = null; // opcional: id si el padre la pasa
+  @Input() bird: Bird | null = null; // opcional: entidad para editar
+  @Output() saved = new EventEmitter<Bird>();
+  @Output() canceled = new EventEmitter<void>();
   isEditMode = false;
   pageTitle = 'Registrar nueva ave';
   
@@ -42,18 +45,29 @@ export class FormBirdComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private birdRepository: BirdRepository,
-    private addBirdUseCase: AddBirdUseCase
+    private addBirdUseCase: AddBirdUseCase,
+    private updateBirdUseCase: UpdateBirdUseCase
   ) {}
 
 
   formErrors = inject(FormErrorsService);
   
   ngOnInit(): void {
-    // Verificar si estamos en modo edición
-    this.birdId = this.route.snapshot.paramMap.get('id');
-    this.isEditMode = !!this.birdId;
-    
-    if (this.isEditMode) {
+    // Si el padre pasó una entidad o un id, priorizarlos sobre la ruta.
+    const routeId = this.route.snapshot.paramMap.get('id');
+    // Prioridad: input `bird` > input `birdId` > route param
+    if (this.bird) {
+      this.isEditMode = true;
+      this.pageTitle = 'Editar ave';
+      // inicializar formulario con la entidad pasada
+      this.initForm();
+    } else if (this.birdId) {
+      this.isEditMode = true;
+      this.pageTitle = 'Editar ave';
+      this.loadBirdData();
+    } else if (routeId) {
+      this.birdId = routeId;
+      this.isEditMode = true;
       this.pageTitle = 'Editar ave';
       this.loadBirdData();
     } else {
@@ -63,6 +77,8 @@ export class FormBirdComponent implements OnInit {
   }
   
   private async loadBirdData(): Promise<void> {
+    // Si la entidad ya fue pasada como input, no recargamos
+    if (this.bird) return;
     if (!this.birdId) return;
     
     try {
@@ -129,14 +145,17 @@ export class FormBirdComponent implements OnInit {
     
     try {
       if (this.isEditMode && this.birdId) {
-        // Modo edición
-        await this.birdRepository.editBird(this.birdId, this.birdForm.value);
+        // Modo edición: usar el caso de uso de actualización para respetar la lógica de dominio
+        const updated = await this.updateBirdUseCase.execute(this.birdId, this.birdForm.value);
+        this.bird = updated; // actualizar el estado local con la entidad retornada
         this.successMessage = '¡Ave actualizada correctamente!';
+        this.saved.emit(updated);
       } else {
         // Modo creación
-        await this.addBirdUseCase.execute(this.birdForm.value);
+        const created = await this.addBirdUseCase.execute(this.birdForm.value);
         this.successMessage = '¡Ave agregada correctamente!';
         this.resetForm(); // Limpiar después de crear
+        this.saved.emit(created);
       }
       
     } catch (err: any) {

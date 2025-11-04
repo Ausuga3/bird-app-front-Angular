@@ -50,7 +50,7 @@
                             </td>
                             @if (canSeeActions(bird)) {
                                 <td>
-                                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="editBird(bird.id)">
+                                    <button class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/birds/edit', bird.id]">
                                         <span class="icon">✏️</span> Editar
                                     </button>
                                     <button class="btn btn-sm btn-danger" (click)="deleteBird(bird.id)">

@@ -99,8 +99,4 @@ export class TableBirdComponent implements OnInit {
     return bird.created_by === this.user?.id;
   }
   
-  editBird(id: string): void {
-    this.router.navigate(['/birds/edit', id]);
-  }
-  
 }
