@@ -43,8 +43,8 @@ export class GetUsersUseCase {
 
 		if (target.isActive === enable) return target; 
 
-		const updated: User = { ...target, isActive: enable };
-		return await this.userRepository.updateUser(updated);
+		const patch: Partial<User> = { isActive: enable };
+		return await this.userRepository.updateUser(target.id, patch);
         
 	}
 }

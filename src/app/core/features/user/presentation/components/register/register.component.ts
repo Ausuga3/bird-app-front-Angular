@@ -1,6 +1,8 @@
-import {  Component, inject } from '@angular/core';
+import {  Component, inject, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { RegisterUserUseCase } from '../../../aplication/use-cases/register-user.usecase';
+import { UpdateUserUseCase } from '../../../aplication/use-cases/updateUser.use-case';
+import { User } from '../../../domain/entities/user.interface';
 
 @Component({
   selector: 'app-register',
@@ -10,9 +12,15 @@ import { RegisterUserUseCase } from '../../../aplication/use-cases/register-user
   styleUrls: ['./register.component.css'],
  
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnChanges {
+  @Input() user?: User | null = null;
+  @Output() saved = new EventEmitter<User>();
+
   private fb = inject(FormBuilder);
   private registerUser = inject(RegisterUserUseCase);
+  private updateUser = inject(UpdateUserUseCase);
+
+  isEdit = false;
 
   form:FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
@@ -25,8 +33,32 @@ export class RegisterComponent {
   errorMessage = '';
   successMessage = '';
 
+  ngOnInit(): void {
+    if (this.user) this.setupEditMode(this.user);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['user'] && changes['user'].currentValue) {
+      this.setupEditMode(changes['user'].currentValue as User);
+    }
+  }
+
+  private setupEditMode(user: User) {
+    this.isEdit = true;
+    this.form.patchValue({
+      name: user.name ?? '',
+      email: user.email ?? ''
+    });
+
+    this.form.get('password')?.clearValidators();
+    this.form.get('confirmPassword')?.clearValidators();
+    this.form.get('terms')?.clearValidators();
+    this.form.get('password')?.updateValueAndValidity();
+    this.form.get('confirmPassword')?.updateValueAndValidity();
+    this.form.get('terms')?.updateValueAndValidity();
+  }
+
   async onSubmit() {
-    console.log('➡️ Formulario enviado');
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -38,19 +70,28 @@ export class RegisterComponent {
 
     const { name, email, password, confirmPassword } = this.form.value;
 
-    if (password !== confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden.';
-      return;
-    }
-
-    try{
-      const user = await this.registerUser.execute({ name, email, password });
+    try {
+      if (this.isEdit && this.user) {
+        const dto = { userId: this.user.id, name, email };
+        const updated = await this.updateUser.execute(this.user.id, dto);
+        this.successMessage = 'Usuario actualizado correctamente';
+        this.saved.emit(updated);
+        console.log('🧩 Usuario actualizado:', updated);
+      } else {
+        // Validaciones específicas de registro
+        if (password !== confirmPassword) {
+          this.errorMessage = 'Las contraseñas no coinciden.';
+          return;
+        }
+        const user = await this.registerUser.execute({ name, email, password });
         this.successMessage = 'Registro exitoso';
-      console.log('🧩 Usuario registrado:', user);
-      this.form.reset();
+        console.log('🧩 Usuario registrado:', user);
+        this.saved.emit(user);
+        this.form.reset();
+      }
     } catch (error) {
-      console.error('❌ Error al registrar usuario:', error);
-      this.errorMessage = 'Error al registrar usuario.';
+      console.error('❌ Error en operación de usuario:', error);
+      this.errorMessage = (error as Error)?.message ?? 'Error al procesar la solicitud.';
     }
   }
  }

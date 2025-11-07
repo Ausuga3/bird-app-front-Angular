@@ -1,0 +1,13 @@
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+  <h5 class="card-title">Ave: {{ sighting()?.birdCommonName || '—' }}</h5>
+  <h6 class="card-subtitle mb-2 text-body-secondary">Nombre Científico: {{ sighting()?.birdScientificName || '—' }}</h6>
+  <p class="card-text">Registrado por: {{ sighting()?.userName || sighting()?.userId || 'Usuario desconocido' }}</p>
+    <p class="card-text">Coordenadas: {{ sighting() ? (sighting()!.coordinates.latitude + ', ' + sighting()!.coordinates.longitude) : '—' }}</p>
+    <p class="card-text">Registrado en: {{ sighting() ? formatDate(sighting()!.created_At) : '—' }}</p>
+    <p class="card-text">Actualizado en: {{ sighting() ? formatDate(sighting()!.updated_At) : '—' }}</p>
+    
+    <a [routerLink]="['/sightings','edit', sighting()?.id]" *ngIf="canSeeActions()" class="card-link">Editar</a>
+   
+  </div>
+</div>

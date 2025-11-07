@@ -44,6 +44,7 @@
             <th>País</th>
             <th>Coordenadas</th>
             <th>Notas</th>
+            <th>Detalles</th>
             @if(canSeeAnyActions()){
               <th>Acciones</th>
             }
@@ -59,6 +60,9 @@
                 {{ sighting.coordinates ? (sighting.coordinates.latitude.toFixed(4) + ', ' + sighting.coordinates.longitude.toFixed(4)) : 'N/A' }}
               </td>
               <td>{{ sighting.notes || '-' }}</td>
+              <td>
+                <a class="btn btn-sm btn-info" [routerLink]="['/details-sighting', sighting.id]" title="Detalles">🔎 Detalles</a>
+              </td>
               @if(canSeeActions(sighting)){
               <td>
                 <a

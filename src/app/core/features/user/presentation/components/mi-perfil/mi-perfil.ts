@@ -7,10 +7,11 @@ import { SessionRepository } from '../../../domain/repositories/sesion.repositor
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { User } from '../../../domain/entities/user.interface';
 import { RolEnum } from '../../../domain/entities/rol.interface';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-mi-perfil',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl:'mi-perfil.html',
   styleUrls: ['mi-perfil.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

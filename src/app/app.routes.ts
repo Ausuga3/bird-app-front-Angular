@@ -10,7 +10,10 @@ export const routes: Routes = [
     {
     path: 'register',
     component: RegisterPageComponent
-     
+    },
+    {
+      path: 'register/:id',
+      loadComponent: ()=> import('./core/features/user/presentation/pages/register-page/register-page.component')
     },
     {
     path: 'login',
@@ -52,6 +55,11 @@ export const routes: Routes = [
       path: 'sightings/add:id',
       loadComponent: () =>
          import('./core/features/sighting/presentation/pages/sighting-page/sighting-page').then(m => m.SightingPage)
+    },
+    {
+      path: 'details-sighting/:id',
+      loadComponent: () => 
+        import('./core/features/sighting/presentation/pages/details-sightings-page/details-sightings-page').then(m => m.DetailsSightingsPage)
     },
     {
       path: 'mi-perfil',

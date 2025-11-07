@@ -1,5 +1,5 @@
 
 <div class="container">
     <h1 class="text-title text-center">Pagina de registro</h1>
-    <app-register/>
+    <app-register [user]="user" (saved)="onSaved($event)"/>
 </div>

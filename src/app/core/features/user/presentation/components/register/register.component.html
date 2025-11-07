@@ -18,22 +18,28 @@
 
   <div class="mb-3">
     <label for="password" class="form-label">Contraseña</label>
-    <input type="password" class="form-control" id="password" formControlName="password">
+    @if(!isEdit) {
+      <input type="password" class="form-control" id="password" formControlName="password">
+    }
   </div>
 
 
   <div class="mb-3">
     <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
-    <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword">
+    @if(!isEdit) {
+      <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword">
+    }
   </div>
   
 
   <div class="mb-3 form-check">
-   <input type="checkbox" class="form-check-input" id="terms" formControlName="terms">
-    <label class="form-check-label" for="terms">Términos y condiciones</label>
+   @if(!isEdit) {
+     <input type="checkbox" class="form-check-input" id="terms" formControlName="terms">
+      <label class="form-check-label" for="terms">Términos y condiciones</label>
+   }
   </div>
 
-  <button type="submit" class="btn btn-primary">Registrarse</button>
+  <button type="submit" class="btn btn-primary">@if(isEdit) {Actualizar} @else {Registrarse}</button>
 
   @if(errorMessage) {
     <div class="alert alert-danger mt-3" role="alert">

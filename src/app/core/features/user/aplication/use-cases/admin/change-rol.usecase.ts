@@ -24,7 +24,7 @@ export class ChangeRolUseCase {
             description: dto.newRol === RolEnum.EXPERT ? 'Experto en aves' : 'Usuario normal'
         };
 
-        const updatedUser: User = {...targetUser, rol: newRol };
-        return await this.userRepository.updateUser(updatedUser);
+        const patch: Partial<User> = { rol: newRol };
+        return await this.userRepository.updateUser(targetUser.id, patch);
     }
 }

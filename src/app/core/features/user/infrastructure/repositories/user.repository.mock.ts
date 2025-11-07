@@ -55,13 +55,16 @@ export class UserRepositoryMock implements UserRepository {
         return users.find(u => u.id === id) ?? null;
     }
 
-    async updateUser(user: User): Promise<User> {
+    async updateUser(id: string, user: Partial<User>): Promise<User> {
         const users = this.dataSource.getAll() || [];
-        const idx = users.findIndex(u => u.id === user.id);
-        if (idx === -1) throw new Error('Usuario no encontrado');
-        users[idx] = user;
+        const index = users.findIndex(u => u.id === id);
+        if (index === -1) {
+            throw new Error('Usuario no encontrado');
+        }
+        const updatedUser = { ...users[index], ...user };
+        users[index] = updatedUser;
         this.dataSource.saveAll(users);
-        return user;
+        return updatedUser;
     }
 
     async getUsers(user: User): Promise<User[]> {

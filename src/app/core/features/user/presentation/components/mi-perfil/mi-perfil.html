@@ -1,6 +1,9 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 <div class="container py-5">
+    <div class="d-flex">
+    <button [routerLink]="['/register', user?.id]" class="btn btn-primary">Actualizar Perfil</button>
+    </div>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="flip-card mx-auto">
@@ -42,4 +45,5 @@
             </div>
         </div>
     </div>
+
 </div>

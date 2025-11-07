@@ -65,4 +65,8 @@ export class SightingLocalRepository implements SightingRepository {
     this.writeAll(items);
     return merged;
   }
+
+  async viewSighting(id: string): Promise<Sighting | null> {
+    return this.getSightingById(id);
+  }
 }

@@ -18,7 +18,7 @@ export class ChangeActiveUseCase {
 
         if (targetUser.isActive === dto.isActive) return targetUser;
 
-        const updatedUser: User = { ...targetUser, isActive: dto.isActive };
-        return await this.userRepository.updateUser(updatedUser);
+        const patch: Partial<User> = { isActive: dto.isActive };
+        return await this.userRepository.updateUser(targetUser.id, patch);
     }
 }
