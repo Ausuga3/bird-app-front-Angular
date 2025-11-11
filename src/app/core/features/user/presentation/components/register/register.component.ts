@@ -2,7 +2,9 @@ import {  Component, inject, Input, Output, EventEmitter, OnInit, OnChanges, Sim
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { RegisterUserUseCase } from '../../../aplication/use-cases/register-user.usecase';
 import { UpdateUserUseCase } from '../../../aplication/use-cases/updateUser.use-case';
+import { LoginUserUseCase } from '../../../aplication/use-cases/login.usecase';
 import { User } from '../../../domain/entities/user.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -19,6 +21,8 @@ export class RegisterComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private registerUser = inject(RegisterUserUseCase);
   private updateUser = inject(UpdateUserUseCase);
+  private loginUser = inject(LoginUserUseCase);
+  private router = inject(Router);
 
   isEdit = false;
 
@@ -86,6 +90,20 @@ export class RegisterComponent implements OnInit, OnChanges {
         const user = await this.registerUser.execute({ name, email, password });
         this.successMessage = 'Registro exitoso';
         console.log('🧩 Usuario registrado:', user);
+        
+        // Auto-login después del registro exitoso
+        try {
+          console.log('🔐 [RegisterComponent] Auto-login after registration...');
+          const loggedUser = await this.loginUser.execute({ email, password });
+          if (loggedUser) {
+            console.log('✅ [RegisterComponent] Auto-login successful, redirecting to mi-perfil...');
+            this.router.navigate(['/mi-perfil']);
+          }
+        } catch (loginError) {
+          console.error('❌ Auto-login failed:', loginError);
+          // Si falla el auto-login, al menos mostramos éxito del registro
+        }
+        
         this.saved.emit(user);
         this.form.reset();
       }

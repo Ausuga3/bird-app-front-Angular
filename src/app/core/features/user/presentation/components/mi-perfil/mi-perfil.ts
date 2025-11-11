@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, PLATFORM_ID, effect } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SESSION_REPOSITORY } from '../../../domain/repositories/token-sesion';
@@ -8,21 +8,34 @@ import { UserRepository } from '../../../domain/repositories/user.repository';
 import { User } from '../../../domain/entities/user.interface';
 import { RolEnum } from '../../../domain/entities/rol.interface';
 import { RouterLink } from "@angular/router";
+import { AuthStateService } from '../../../../../shared/services/auth-state.service';
 
 @Component({
   selector: 'app-mi-perfil',
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl:'mi-perfil.html',
   styleUrls: ['mi-perfil.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class MiPerfil implements OnInit {
   private readonly sessionRepo = inject(SESSION_REPOSITORY) as SessionRepository;
   private readonly userRepo = inject(USER_REPOSITORY) as UserRepository;
+  private readonly authState = inject(AuthStateService);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
+  
+  constructor() {
+    // Reaccionar a cambios en el usuario autenticado
+    effect(() => {
+      const currentUser = this.authState.currentUser();
+      if (currentUser) {
+        console.log('👤 [MiPerfil] Usuario actualizado desde AuthState:', currentUser);
+        this.user = currentUser;
+      }
+    });
+  }
   requesting = false;
   requestMessage = '';
   desiredRole: RolEnum = RolEnum.EXPERT;

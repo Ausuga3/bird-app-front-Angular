@@ -1,0 +1,163 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { UserRepository } from '../../domain/repositories/user.repository';
+import { User } from '../../domain/entities/user.interface';
+import { RolEnum } from '../../domain/entities/rol.interface';
+import { firstValueFrom } from 'rxjs';
+
+interface BackendUserResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: string; // Backend usa 'Usuario', 'Experto', 'Admin'
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface LoginResponse {
+  user: BackendUserResponse;
+  token: string;
+}
+
+@Injectable()
+export class UserRepositoryHttp extends UserRepository {
+  private readonly http = inject(HttpClient);
+  private readonly API_URL = 'http://localhost:5000/api';
+
+  // Mapear role string del backend a RolEnum del frontend
+  private mapRoleToEnum(backendRole: string): RolEnum {
+    const mapping: Record<string, RolEnum> = {
+      'Usuario': RolEnum.USER,
+      'Experto': RolEnum.EXPERT,
+      'Admin': RolEnum.ADMIN
+    };
+    return mapping[backendRole] ?? RolEnum.USER;
+  }
+
+  // Convertir respuesta del backend a User del frontend
+  private mapBackendUserToFrontend(backendUser: BackendUserResponse): User {
+    const roleName = this.mapRoleToEnum(backendUser.role);
+    return {
+      id: backendUser.id,
+      name: backendUser.name,
+      email: backendUser.email,
+      rol: { 
+        id: crypto.randomUUID(), 
+        name: roleName,
+        description: backendUser.role
+      },
+      isActive: backendUser.isActive,
+      date: new Date(backendUser.createdAt)
+    };
+  }
+
+  async register(user: User): Promise<User> {
+    try {
+      console.log('[UserRepositoryHttp] 📤 Registrando usuario:', user.email);
+      
+      const payload = {
+        name: user.name,
+        email: user.email,
+        password: (user as any).password // Usar password sin hashear
+      };
+
+      const response = await firstValueFrom(
+        this.http.post<BackendUserResponse>(`${this.API_URL}/Auth/register`, payload)
+      );
+
+      console.log('[UserRepositoryHttp] ✅ Usuario registrado:', response);
+      return this.mapBackendUserToFrontend(response);
+    } catch (error) {
+      console.error('[UserRepositoryHttp] ❌ Error al registrar:', error);
+      throw error;
+    }
+  }
+
+  async login(email: string, password: string): Promise<{ user: User; token: string } | null> {
+    try {
+      console.log('[UserRepositoryHttp] 🔐 Login:', email);
+      
+      const response = await firstValueFrom(
+        this.http.post<LoginResponse>(`${this.API_URL}/Auth/login`, { email, password })
+      );
+
+      if (!response || !response.user || !response.token) {
+        console.log('[UserRepositoryHttp] ❌ Login falló - respuesta inválida');
+        return null;
+      }
+
+      const user = this.mapBackendUserToFrontend(response.user);
+      console.log('[UserRepositoryHttp] ✅ Login exitoso:', user);
+      
+      return { user, token: response.token };
+    } catch (error: any) {
+      if (error.status === 401 || error.status === 400) {
+        console.log('[UserRepositoryHttp] ❌ Credenciales inválidas');
+        return null;
+      }
+      console.error('[UserRepositoryHttp] ❌ Error en login:', error);
+      throw error;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      console.log('[UserRepositoryHttp] 🔍 Buscando usuario por email:', email);
+      const response = await firstValueFrom(
+        this.http.get<BackendUserResponse>(`${this.API_URL}/Users/email/${email}`)
+      );
+      return this.mapBackendUserToFrontend(response);
+    } catch (error: any) {
+      if (error.status === 404) {
+        return null;
+      }
+      console.error('[UserRepositoryHttp] ❌ Error al buscar por email:', error);
+      throw error;
+    }
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    try {
+      console.log('[UserRepositoryHttp] 🔍 Obteniendo usuario por ID:', id);
+      const response = await firstValueFrom(
+        this.http.get<BackendUserResponse>(`${this.API_URL}/Users/${id}`)
+      );
+      const user = this.mapBackendUserToFrontend(response);
+      console.log('[UserRepositoryHttp] ✅ Usuario obtenido:', user);
+      return user;
+    } catch (error: any) {
+      if (error.status === 404) {
+        console.log('[UserRepositoryHttp] ⚠️ Usuario no encontrado');
+        return null;
+      }
+      console.error('[UserRepositoryHttp] ❌ Error al obtener usuario:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(userId: string, patch: Partial<User>): Promise<User> {
+    try {
+      console.log('[UserRepositoryHttp] 📝 Actualizando usuario:', userId, patch);
+      const response = await firstValueFrom(
+        this.http.put<BackendUserResponse>(`${this.API_URL}/Users/${userId}`, patch)
+      );
+      return this.mapBackendUserToFrontend(response);
+    } catch (error) {
+      console.error('[UserRepositoryHttp] ❌ Error al actualizar usuario:', error);
+      throw error;
+    }
+  }
+
+  async getUsers(users: User): Promise<User[]> {
+    try {
+      console.log('[UserRepositoryHttp] 📋 Obteniendo lista de usuarios');
+      const response = await firstValueFrom(
+        this.http.get<BackendUserResponse[]>(`${this.API_URL}/Users`)
+      );
+      return response.map(u => this.mapBackendUserToFrontend(u));
+    } catch (error) {
+      console.error('[UserRepositoryHttp] ❌ Error al obtener usuarios:', error);
+      throw error;
+    }
+  }
+}

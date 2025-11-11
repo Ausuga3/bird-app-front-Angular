@@ -38,10 +38,14 @@ export class UserRepositoryMock implements UserRepository {
         return user;
     }
 
-    async login(email: string, password: string): Promise<User | null> {
+    async login(email: string, password: string): Promise<{ user: User; token: string } | null> {
         const users = this.dataSource.getAll() || [];
         const user = users.find(u => u.email === email);
-        return user ?? null;
+        if (!user) return null;
+        
+        // Mock: generar un token fake
+        const token = 'mock-jwt-token-' + crypto.randomUUID();
+        return { user, token };
     }
 
     async getUserByEmail(email: string): Promise<User | null> {
