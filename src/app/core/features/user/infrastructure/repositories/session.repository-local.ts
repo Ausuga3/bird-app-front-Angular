@@ -19,9 +19,15 @@ export class SessionRepositoryLocal implements SessionRepository {
     return raw ? (JSON.parse(raw) as Session) : null;
   }
 
-  async start(userId: string): Promise<void> {
+  async start(userId: string, token?: string): Promise<void> {
     if (!this.isBrowser) return;
     const session: Session = { userId, startedAt: new Date().toISOString() };
+    // If caller provided a token in extra arg, support it via optional second param
+    try {
+      // preserve existing signature by reading arguments if passed
+      const maybeToken = token ?? (arguments.length > 1 ? arguments[1] as string | undefined : undefined);
+      if (maybeToken) (session as any).token = maybeToken;
+    } catch {}
     localStorage.setItem(this.key, JSON.stringify(session));
     try {
       console.log('[SessionRepositoryLocal] start(): session saved', session);

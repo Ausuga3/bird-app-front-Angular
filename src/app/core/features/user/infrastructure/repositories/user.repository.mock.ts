@@ -38,10 +38,10 @@ export class UserRepositoryMock implements UserRepository {
         return user;
     }
 
-    async login(email: string, password: string): Promise<User | null> {
+    async login(email: string, password: string): Promise<{ user: User | null; token?: string }> {
         const users = this.dataSource.getAll() || [];
-        const user = users.find(u => u.email === email);
-        return user ?? null;
+        const user = users.find(u => u.email === email) ?? null;
+        return { user, token: undefined };
     }
 
     async getUserByEmail(email: string): Promise<User | null> {

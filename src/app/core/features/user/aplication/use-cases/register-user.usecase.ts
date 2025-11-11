@@ -12,27 +12,35 @@ export class RegisterUserUseCase {
   private readonly userRepository = inject(USER_REPOSITORY);
 
  async execute(dto: RegisterUserDto): Promise<User>{
-  const hashedPassword = UserDomainService.hashPassword(dto.password);
-  const roleName = dto.rolName ?? RolEnum.USER;
-  const role: Rol = {
-    id: crypto.randomUUID(),
-    name: roleName,
-    description: roleName === RolEnum.EXPERT ? 'Usuario por defecto' : ''
-  };
+    console.log('🎯 [RegisterUserUseCase] Received DTO:', dto);
+    
+    const roleName = dto.rolName ?? RolEnum.USER;
+    const role: Rol = {
+      id: crypto.randomUUID(),
+      name: roleName,
+      description: roleName === RolEnum.EXPERT ? 'Usuario experto' : 'Usuario por defecto'
+    };
 
-  const newUser:User = {
-    id: crypto.randomUUID(),
-    name: dto.name,
-    email: dto.email,
-    hashedPassword,
-    isActive: true,
-    date: new Date(),
-    rol: role
-  };
-
-  // Activar el usuario antes de registrarlo
-  const activatedUser = UserDomainService.activateUser(newUser);
-  const createdUser = await this.userRepository.register(activatedUser);
-  return createdUser;
+    // Crear objeto User completo para mantener compatibilidad con ambos repos
+    const hashedPassword = UserDomainService.hashPassword(dto.password);
+    
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      name: dto.name,
+      email: dto.email,
+      hashedPassword,
+      isActive: true,
+      date: new Date(),
+      rol: role,
+      // Agregar password plano para que HTTP repo lo encuentre
+      password: dto.password
+    } as any;
+  
+    console.log('📦 [RegisterUserUseCase] Calling repository.register...');
+    
+    // Activar el usuario antes de registrarlo
+    const activatedUser = UserDomainService.activateUser(newUser);
+    const createdUser = await this.userRepository.register(activatedUser);
+    return createdUser;
  }
 }

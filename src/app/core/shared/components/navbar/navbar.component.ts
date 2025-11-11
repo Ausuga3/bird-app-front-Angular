@@ -9,7 +9,8 @@ import { RolEnum } from '../../../features/user/domain/entities/rol.interface';
   imports: [RouterLink],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // Cambiar a Default para que detecte cambios en signals
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class NavbarComponent implements OnInit {
    private readonly authState = inject(AuthStateService);
