@@ -33,6 +33,7 @@ export class MiPerfil implements OnInit {
       if (currentUser) {
         console.log('👤 [MiPerfil] Usuario actualizado desde AuthState:', currentUser);
         this.user = currentUser;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -45,15 +46,8 @@ export class MiPerfil implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    try {
-      const session = await this.sessionRepo.getActive();
-      if (!session) return;
-      const current = await this.userRepo.getUserById(session.userId);
-      this.user = current;
-      this.cdr.markForCheck();
-    } catch (err) {
-      console.error('Error cargando perfil:', err);
-    }
+    // Ya no necesitamos cargar manualmente, el effect() se encarga
+    console.log('✅ [MiPerfil] ngOnInit - El effect() manejará la carga del usuario');
   }
 
 
