@@ -3,18 +3,25 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Bird } from '../../domain/entities/bird.interface';
 import { BirdRepository } from '../../domain/repositories/bird.repository';
+import { environment } from '../../../../../../environments/environment';
 
 @Injectable()
 export class BirdHttpRepository implements BirdRepository {
   private http = inject(HttpClient);
   
-  // TODO: Mover a environment cuando se configure
-  private baseUrl = '/api/birds';
+  private baseUrl = `${environment.apiUrl}/birds`;
   
   async addBird(bird: Bird): Promise<Bird> {
     try {
-      // Omitimos id en la creación - el backend lo asignará
-      const { id, ...birdData } = bird;
+      // El backend espera solo estos campos (CreateBirdCommand)
+      const birdData = {
+        commonName: bird.commonName,
+        scientificName: bird.scientificName,
+        family: bird.family,
+        conservationStatus: bird.conservationStatus,
+        notes: bird.notes
+      };
+      
       return await firstValueFrom(
         this.http.post<Bird>(this.baseUrl, birdData)
       );
@@ -53,8 +60,17 @@ export class BirdHttpRepository implements BirdRepository {
 
   async editBird(id: string, patch: Partial<Bird>): Promise<Bird> {
     try {
+      // El backend espera PUT con el body completo (UpdateBirdCommand)
+      const birdData = {
+        commonName: patch.commonName,
+        scientificName: patch.scientificName,
+        family: patch.family,
+        conservationStatus: patch.conservationStatus,
+        notes: patch.notes
+      };
+      
       return await firstValueFrom(
-        this.http.patch<Bird>(`${this.baseUrl}/${id}`, patch)
+        this.http.put<Bird>(`${this.baseUrl}/${id}`, birdData)
       );
     } catch (error) {
       this.handleError(error as HttpErrorResponse);

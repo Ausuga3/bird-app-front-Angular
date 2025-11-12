@@ -15,12 +15,7 @@ import { FormErrorsService } from '../../../../../../shared/forms/form-errors.se
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './form-bird.component.html',
   styleUrls: ['./form-bird.component.css'],
-  providers: [
-    // Asegúrate de proporcionar todos los servicios necesarios
-    { provide: BirdRepository, useClass: BirdLocalRepository },
-    // Use cases are providedIn: 'root' so they don't need to be listed here
-    // AuthStateService ya está providenciado en root con { providedIn: 'root' }
-  ]
+  // Eliminamos providers para usar los globales (BirdHttpRepository)
 })
 export class FormBirdComponent implements OnInit {
   birdForm!: FormGroup;
@@ -47,7 +42,10 @@ export class FormBirdComponent implements OnInit {
     private birdRepository: BirdRepository,
     private addBirdUseCase: AddBirdUseCase,
     private updateBirdUseCase: UpdateBirdUseCase
-  ) {}
+  ) {
+    // Inicializar formulario vacío para evitar errores en el template
+    this.initForm();
+  }
 
 
   formErrors = inject(FormErrorsService);
@@ -126,6 +124,7 @@ export class FormBirdComponent implements OnInit {
   
   // Determinar si un campo tiene errores
   hasError(controlName: string): boolean {
+    if (!this.birdForm) return false;
     const control = this.birdForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
@@ -150,12 +149,22 @@ export class FormBirdComponent implements OnInit {
         this.bird = updated; // actualizar el estado local con la entidad retornada
         this.successMessage = '¡Ave actualizada correctamente!';
         this.saved.emit(updated);
+        
+        // Navegar de vuelta a la lista después de 1 segundo para que el usuario vea el mensaje
+        setTimeout(() => {
+          this.router.navigate(['/birds']);
+        }, 1000);
       } else {
         // Modo creación
         const created = await this.addBirdUseCase.execute(this.birdForm.value);
         this.successMessage = '¡Ave agregada correctamente!';
         this.resetForm(); // Limpiar después de crear
         this.saved.emit(created);
+        
+        // Navegar de vuelta a la lista después de 1 segundo
+        setTimeout(() => {
+          this.router.navigate(['/birds']);
+        }, 1000);
       }
       
     } catch (err: any) {

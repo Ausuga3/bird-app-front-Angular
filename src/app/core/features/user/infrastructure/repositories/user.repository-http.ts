@@ -22,7 +22,7 @@ interface LoginResponse {
 @Injectable()
 export class UserRepositoryHttp extends UserRepository {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:5000/api';
+  private readonly API_URL = 'http://localhost:5291/api';
 
   // Mapear role string del backend a RolEnum del frontend
   private mapRoleToEnum(backendRole: string): RolEnum {
@@ -55,11 +55,15 @@ export class UserRepositoryHttp extends UserRepository {
     try {
       console.log('[UserRepositoryHttp] 📤 Registrando usuario:', user.email);
       
+      // Backend espera PascalCase y Role como string enum ("Usuario", "Experto", "Admin")
       const payload = {
-        name: user.name,
-        email: user.email,
-        password: (user as any).password // Usar password sin hashear
+        Email: user.email,
+        Password: (user as any).password, // Usar password sin hashear
+        Name: user.name,
+        Role: "Usuario" // Por defecto todos los nuevos usuarios son "Usuario"
       };
+
+      console.log('[UserRepositoryHttp] 📦 Payload enviado:', payload);
 
       const response = await firstValueFrom(
         this.http.post<BackendUserResponse>(`${this.API_URL}/Auth/register`, payload)
@@ -67,8 +71,12 @@ export class UserRepositoryHttp extends UserRepository {
 
       console.log('[UserRepositoryHttp] ✅ Usuario registrado:', response);
       return this.mapBackendUserToFrontend(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error('[UserRepositoryHttp] ❌ Error al registrar:', error);
+      console.error('[UserRepositoryHttp] 💥 Error completo:', JSON.stringify(error, null, 2));
+      if (error.error) {
+        console.error('[UserRepositoryHttp] 🔍 Error.error:', error.error);
+      }
       throw error;
     }
   }
@@ -122,8 +130,9 @@ export class UserRepositoryHttp extends UserRepository {
       const response = await firstValueFrom(
         this.http.get<BackendUserResponse>(`${this.API_URL}/Users/${id}`)
       );
+      console.log('[UserRepositoryHttp] 📦 Respuesta cruda del backend:', response);
       const user = this.mapBackendUserToFrontend(response);
-      console.log('[UserRepositoryHttp] ✅ Usuario obtenido:', user);
+      console.log('[UserRepositoryHttp] ✅ Usuario mapeado:', user);
       return user;
     } catch (error: any) {
       if (error.status === 404) {

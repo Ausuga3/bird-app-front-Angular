@@ -12,7 +12,7 @@ export class RegisterUserUseCase {
   private readonly userRepository = inject(USER_REPOSITORY);
 
  async execute(dto: RegisterUserDto): Promise<User>{
-  const hashedPassword = UserDomainService.hashPassword(dto.password);
+  // NO hasheamos la contraseña aquí - el backend lo hace con BCrypt
   const roleName = dto.rolName ?? RolEnum.USER;
   const role: Rol = {
     id: crypto.randomUUID(),
@@ -24,11 +24,14 @@ export class RegisterUserUseCase {
     id: crypto.randomUUID(),
     name: dto.name,
     email: dto.email,
-    hashedPassword,
+    hashedPassword: '', // El backend lo generará
     isActive: true,
     date: new Date(),
     rol: role
   };
+
+  // Adjuntar el password sin hashear para que el repositorio lo envíe al backend
+  (newUser as any).password = dto.password;
 
   // Activar el usuario antes de registrarlo
   const activatedUser = UserDomainService.activateUser(newUser);
