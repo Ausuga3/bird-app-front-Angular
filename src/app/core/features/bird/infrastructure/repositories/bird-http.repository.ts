@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { Bird } from '../../domain/entities/bird.interface';
+import { Bird, BirdFamily, ConservationStatusEnum } from '../../domain/entities/bird.interface';
 import { BirdRepository } from '../../domain/repositories/bird.repository';
 import { environment } from '../../../../../../environments/environment';
 
@@ -10,6 +10,101 @@ export class BirdHttpRepository implements BirdRepository {
   private http = inject(HttpClient);
   
   private baseUrl = `${environment.apiUrl}/birds`;
+
+  /**
+   * Mapea el enum BirdFamily del frontend (valor español) al nombre del enum del backend
+   */
+  private mapFamilyToBackend(family: BirdFamily): string {
+    const familyMapping: Record<string, string> = {
+      'Rapaces diurnas (halcones, águilas, gavilanes)': 'Accipitridae',
+      'Patos, gansos y cisnes': 'Anatidae',
+      'Palomas y tórtolas': 'Columbidae',
+      'Colibríes': 'Trochilidae',
+      'Loros y guacamayas': 'Psittacidae',
+      'Búhos y lechuzas': 'Strigidae',
+      'Atrapamoscas y mosqueros': 'Tyrannidae',
+      'Tangaras': 'Thraupidae',
+      'Mirlos y zorzales': 'Turdidae',
+      'Pinzones y semilleros': 'Emberizidae',
+      'Pájaros carpinteros': 'Picidae',
+      'Garzas y garcetas': 'Ardeidae',
+      'Halcones y cernícalos': 'Falconidae'
+    };
+    
+    return familyMapping[family] || family;
+  }
+
+  /**
+   * Mapea el nombre del enum BirdFamily del backend al valor español del frontend
+   */
+  private mapFamilyFromBackend(familyName: string): BirdFamily {
+    const backendToFrontend: Record<string, BirdFamily> = {
+      'Accipitridae': BirdFamily.Accipitridae,
+      'Anatidae': BirdFamily.Anatidae,
+      'Columbidae': BirdFamily.Columbidae,
+      'Trochilidae': BirdFamily.Trochilidae,
+      'Psittacidae': BirdFamily.Psittacidae,
+      'Strigidae': BirdFamily.Strigidae,
+      'Tyrannidae': BirdFamily.Tyrannidae,
+      'Thraupidae': BirdFamily.Thraupidae,
+      'Turdidae': BirdFamily.Turdidae,
+      'Emberizidae': BirdFamily.Emberizidae,
+      'Picidae': BirdFamily.Picidae,
+      'Ardeidae': BirdFamily.Ardeidae,
+      'Falconidae': BirdFamily.Falconidae
+    };
+    
+    return backendToFrontend[familyName] || BirdFamily.Accipitridae;
+  }
+
+  /**
+   * Mapea el enum ConservationStatus del frontend al nombre del enum del backend
+   */
+  private mapConservationStatusToBackend(status: ConservationStatusEnum): string {
+    const statusMapping: Record<string, string> = {
+      'Extinta': 'Extinct',
+      'En Peligro': 'Endangered',
+      'Vulnerable': 'Vulnerable',
+      'Casi Amenazada': 'NearThreatened',
+      'Preocupacion Menor': 'LeastConcern',
+      'No Evaluada': 'NotEvaluated'
+    };
+    
+    return statusMapping[status] || status;
+  }
+
+  /**
+   * Mapea el nombre del enum ConservationStatus del backend al valor español del frontend
+   */
+  private mapConservationStatusFromBackend(statusName: string): ConservationStatusEnum {
+    const backendToFrontend: Record<string, ConservationStatusEnum> = {
+      'Extinct': ConservationStatusEnum.extinct,
+      'Endangered': ConservationStatusEnum.endangered,
+      'Vulnerable': ConservationStatusEnum.vulnerable,
+      'NearThreatened': ConservationStatusEnum.nearThreatened,
+      'LeastConcern': ConservationStatusEnum.leastConcern,
+      'NotEvaluated': ConservationStatusEnum.notEvaluated
+    };
+    
+    return backendToFrontend[statusName] || ConservationStatusEnum.notEvaluated;
+  }
+
+  /**
+   * Transforma un ave del backend al formato del frontend
+   */
+  private transformBirdFromBackend(backendBird: any): Bird {
+    return {
+      id: backendBird.id,
+      commonName: backendBird.commonName,
+      scientificName: backendBird.scientificName,
+      family: this.mapFamilyFromBackend(backendBird.family),
+      conservationStatus: this.mapConservationStatusFromBackend(backendBird.conservationStatus),
+      notes: backendBird.notes,
+      created_at: new Date(backendBird.created_At || backendBird.createdAt),
+      updated_at: new Date(backendBird.updated_At || backendBird.updatedAt),
+      created_by: backendBird.created_By || backendBird.createdBy
+    };
+  }
   
   async addBird(bird: Bird): Promise<Bird> {
     try {
@@ -17,44 +112,51 @@ export class BirdHttpRepository implements BirdRepository {
       const birdData = {
         commonName: bird.commonName,
         scientificName: bird.scientificName,
-        family: bird.family,
-        conservationStatus: bird.conservationStatus,
+        family: this.mapFamilyToBackend(bird.family), // Mapear al nombre del enum
+        conservationStatus: this.mapConservationStatusToBackend(bird.conservationStatus), // Mapear al nombre del enum
         notes: bird.notes
       };
       
-      return await firstValueFrom(
-        this.http.post<Bird>(this.baseUrl, birdData)
+      console.log('[BirdHttpRepository] 📤 Enviando ave al backend:', birdData);
+      
+      const response = await firstValueFrom(
+        this.http.post<any>(this.baseUrl, birdData)
       );
+      
+      // Transformar la respuesta del backend al formato del frontend
+      return this.transformBirdFromBackend(response);
     } catch (error) {
       this.handleError(error as HttpErrorResponse);
-      throw error;
     }
   }
 
   async getAllBirds(): Promise<Bird[]> {
     try {
-      return await firstValueFrom(
-        this.http.get<Bird[]>(this.baseUrl)
+      const response = await firstValueFrom(
+        this.http.get<any[]>(this.baseUrl)
       );
+      
+      // Transformar cada ave del backend al formato del frontend
+      return response.map(bird => this.transformBirdFromBackend(bird));
     } catch (error) {
       this.handleError(error as HttpErrorResponse);
-      throw error;
     }
   }
 
   async getBirdById(id: string): Promise<Bird | null> {
     try {
-      const bird = await firstValueFrom(
-        this.http.get<Bird>(`${this.baseUrl}/${id}`)
+      const response = await firstValueFrom(
+        this.http.get<any>(`${this.baseUrl}/${id}`)
       );
-      return bird;
+      
+      // Transformar la respuesta del backend al formato del frontend
+      return this.transformBirdFromBackend(response);
     } catch (error) {
       // Si es 404, retornamos null en lugar de lanzar error
       if ((error as HttpErrorResponse).status === 404) {
         return null;
       }
       this.handleError(error as HttpErrorResponse);
-      throw error;
     }
   }
 
@@ -64,17 +166,19 @@ export class BirdHttpRepository implements BirdRepository {
       const birdData = {
         commonName: patch.commonName,
         scientificName: patch.scientificName,
-        family: patch.family,
-        conservationStatus: patch.conservationStatus,
+        family: patch.family ? this.mapFamilyToBackend(patch.family) : undefined,
+        conservationStatus: patch.conservationStatus ? this.mapConservationStatusToBackend(patch.conservationStatus) : undefined,
         notes: patch.notes
       };
       
-      return await firstValueFrom(
-        this.http.put<Bird>(`${this.baseUrl}/${id}`, birdData)
+      const response = await firstValueFrom(
+        this.http.put<any>(`${this.baseUrl}/${id}`, birdData)
       );
+      
+      // Transformar la respuesta del backend al formato del frontend
+      return this.transformBirdFromBackend(response);
     } catch (error) {
       this.handleError(error as HttpErrorResponse);
-      throw error;
     }
   }
 
@@ -85,7 +189,6 @@ export class BirdHttpRepository implements BirdRepository {
       );
     } catch (error) {
       this.handleError(error as HttpErrorResponse);
-      throw error;
     }
   }
 

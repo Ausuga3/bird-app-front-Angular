@@ -15,7 +15,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const session = JSON.parse(raw) as { userId: string; token?: string };
     
     if (session && session.token) {
-      console.log('[AuthInterceptor] 🔑 Agregando token a la petición');
+      // Decodificar el token JWT para ver el rol (solo para debug)
+      try {
+        const payload = JSON.parse(atob(session.token.split('.')[1]));
+        console.log('[AuthInterceptor] 🔑 Token JWT - Role:', payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload.role);
+      } catch {}
       
       const cloned = req.clone({
         setHeaders: {

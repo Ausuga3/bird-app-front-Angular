@@ -9,7 +9,7 @@ interface BackendUserResponse {
   id: string;
   name: string;
   email: string;
-  role: string; // Backend usa 'Usuario', 'Experto', 'Admin'
+  rolName: string; // Backend devuelve 'rolName' en camelCase: 'Usuario', 'Experto', 'Admin'
   isActive: boolean;
   createdAt: string;
 }
@@ -36,7 +36,7 @@ export class UserRepositoryHttp extends UserRepository {
 
   // Convertir respuesta del backend a User del frontend
   private mapBackendUserToFrontend(backendUser: BackendUserResponse): User {
-    const roleName = this.mapRoleToEnum(backendUser.role);
+    const roleName = this.mapRoleToEnum(backendUser.rolName);
     return {
       id: backendUser.id,
       name: backendUser.name,
@@ -44,7 +44,7 @@ export class UserRepositoryHttp extends UserRepository {
       rol: { 
         id: crypto.randomUUID(), 
         name: roleName,
-        description: backendUser.role
+        description: backendUser.rolName
       },
       isActive: backendUser.isActive,
       date: new Date(backendUser.createdAt)
@@ -147,8 +147,36 @@ export class UserRepositoryHttp extends UserRepository {
   async updateUser(userId: string, patch: Partial<User>): Promise<User> {
     try {
       console.log('[UserRepositoryHttp] 📝 Actualizando usuario:', userId, patch);
+      
+      // Convertir el patch del frontend al formato del backend
+      const backendPatch: any = {};
+      
+      if (patch.name) {
+        backendPatch.Name = patch.name;
+      }
+      
+      if (patch.email) {
+        backendPatch.Email = patch.email;
+      }
+      
+      if (patch.rol) {
+        // Convertir RolEnum del frontend a Role string del backend
+        const roleMapping: Record<RolEnum, string> = {
+          [RolEnum.USER]: 'Usuario',
+          [RolEnum.EXPERT]: 'Experto',
+          [RolEnum.ADMIN]: 'Admin'
+        };
+        backendPatch.Role = roleMapping[patch.rol.name];
+      }
+      
+      if (patch.isActive !== undefined) {
+        backendPatch.IsActive = patch.isActive;
+      }
+
+      console.log('[UserRepositoryHttp] 📦 Payload backend:', backendPatch);
+
       const response = await firstValueFrom(
-        this.http.put<BackendUserResponse>(`${this.API_URL}/Users/${userId}`, patch)
+        this.http.put<BackendUserResponse>(`${this.API_URL}/Users/${userId}`, backendPatch)
       );
       return this.mapBackendUserToFrontend(response);
     } catch (error) {
